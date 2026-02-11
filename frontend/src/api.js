@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   timeout: 60000,
   headers: { 'Content-Type': 'application/json' }
 });
@@ -15,7 +15,6 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
   res => res,
   err => {
-    // Only redirect on 401 if not on auth page and not an auth request
     if (err.response?.status === 401) {
       const isAuthRequest = err.config?.url?.includes('/auth/');
       const isAuthPage = window.location.pathname === '/auth' || window.location.pathname === '/';
