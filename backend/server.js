@@ -362,9 +362,23 @@ async function createMonnifyVirtualAccount(user) {
 }
 
 // ===========================================
-// MIDDLEWARE
+// MIDDLEWARE - FIXED CORS FOR VERCEL
 // ===========================================
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:3000',
+    'https://onetap-eight.vercel.app',
+    'https://www.onetap-eight.vercel.app',
+    'https://payengine.uk',
+    'https://www.payengine.uk'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-key']
+}));
+
 app.use(helmet({ contentSecurityPolicy: false }));
 
 // Monnify webhook needs raw body for signature verification - MUST be before express.json()
@@ -1179,31 +1193,6 @@ const KYC_SERVICES = {
 // ===========================================
 // VTU ROUTES - DancityNG API
 // ===========================================
-
-// Public endpoint to get pricing settings for frontend
-// FIXED: Now returns real markups so frontend can calculate prices correctly
-app.get('/api/settings/pricing', async (_, res) => {
-  try {
-    const pricing = await getPricing();
-    res.json({ 
-      airtime_markup: pricing.airtime_markup || 2,
-      data_markup: pricing.data_markup || 2,
-      vtu_markup: pricing.airtime_markup || 2, // Backward compatibility
-      kyc_profit: pricing.kyc_profit || 50,
-      electricity_markup: pricing.electricity_markup || 0,
-      cable_markup: pricing.cable_markup || 0
-    });
-  } catch (e) {
-    res.json({ 
-      airtime_markup: 2, 
-      data_markup: 2, 
-      vtu_markup: 2, 
-      kyc_profit: 50, 
-      electricity_markup: 0, 
-      cable_markup: 0 
-    });
-  }
-});
 
 app.get('/api/vtu/networks', (_, res) => res.json({ networks: NETWORKS }));
 
@@ -2411,27 +2400,6 @@ app.put('/api/admin/settings/system', adminAuth, async (req, res) => {
   } catch (e) {
     console.error('System settings error:', e);
     res.status(500).json({ error: 'Failed' });
-  }
-});
-
-// Public endpoint to check system status (for frontend)
-app.get('/api/system/status', async (_, res) => {
-  try {
-    const r = await pool.query("SELECT value FROM settings WHERE key='system'");
-    const settings = r.rows[0]?.value || {};
-    res.json({ 
-      maintenance: settings.maintenance_mode || false,
-      payment_enabled: settings.payment_enabled !== false,
-      services: {
-        airtime: settings.airtime_enabled !== false,
-        data: settings.data_enabled !== false,
-        electricity: settings.electricity_enabled !== false,
-        cable: settings.cable_enabled !== false,
-        kyc: settings.kyc_enabled !== false
-      }
-    });
-  } catch (e) {
-    res.json({ maintenance: false, payment_enabled: true, services: { airtime: true, data: true, electricity: true, cable: true, kyc: true } });
   }
 });
 
