@@ -1,0 +1,32 @@
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'http://localhost:5000/api',
+  timeout: 60000,
+  headers: { 'Content-Type': 'application/json' }
+});
+
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('token');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+api.interceptors.response.use(
+  res => res,
+  err => {
+    // Only redirect on 401 if not on auth page and not an auth request
+    if (err.response?.status === 401) {
+      const isAuthRequest = err.config?.url?.includes('/auth/');
+      const isAuthPage = window.location.pathname === '/auth' || window.location.pathname === '/';
+      if (!isAuthRequest && !isAuthPage) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/auth';
+      }
+    }
+    return Promise.reject(err);
+  }
+);
+
+export default api;

@@ -1,0 +1,15 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with rounded corners for app icon -->
+  <rect width="512" height="512" rx="100" fill="url(#iconGradient)"/>
+  
+  <!-- Lightning bolt icon (matching OneTapLogo) -->
+  <path d="M280 70L180 250H240L210 440L360 220H280L330 70H280Z" fill="white"/>
+  
+  <!-- Gradient Definition -->
+  <defs>
+    <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6"/>
+      <stop offset="100%" style="stop-color:#06B6D4"/>
+    </linearGradient>
+  </defs>
+</svg>
