@@ -756,7 +756,7 @@ export default function Welcome() {
             <PayEngineLogo size={42} />
             <div className="nav-brand-text">
               <span className="nav-brand-name">PayEngine</span>
-              <span className="nav-brand-sub">by OneTap --- a Subsidiary of ChiVera</span>
+              <span className="nav-brand-sub">by OneTap (ChiVera) </span>
             </div>
           </div>
           <button className="nav-btn" onClick={() => navigate('/auth')}>
