@@ -1,1053 +1,899 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { C, OneTapLogo } from '../App';
 
-// Landing Page Styles
-const landingStyles = `
-  .landing-page {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #0a0a0f;
-    color: #ffffff;
-    line-height: 1.6;
-    overflow-x: hidden;
-  }
-
-  .landing-page * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-  }
-
-  @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.3); }
-    50% { box-shadow: 0 0 60px rgba(139, 92, 246, 0.5); }
-  }
-
-  @keyframes fade-up {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes slide-in-left {
-    from { opacity: 0; transform: translateX(-50px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-
-  @keyframes slide-in-right {
-    from { opacity: 0; transform: translateX(50px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-
-  .landing-animate {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-  }
-
-  .landing-animate.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .landing-beta-badge {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 8px 16px;
-    background: rgba(217, 70, 239, 0.15);
-    border: 1px solid rgba(217, 70, 239, 0.4);
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #D946EF;
-    z-index: 1000;
-    backdrop-filter: blur(10px);
-    letter-spacing: 1px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .landing-beta-badge::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    background: #D946EF;
-    border-radius: 50%;
-    animation: pulse-glow 2s infinite;
-  }
-
-  .landing-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    padding: 20px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 100;
-    background: rgba(10, 10, 15, 0.8);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  .landing-logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    text-decoration: none;
-  }
-
-  .landing-logo-text {
-    font-size: 24px;
-    font-weight: 700;
-    color: #fff;
-  }
-
-  .landing-nav-links {
-    display: flex;
-    gap: 40px;
-    list-style: none;
-  }
-
-  .landing-nav-links a {
-    color: #A1A1AA;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    transition: color 0.3s;
-    cursor: pointer;
-  }
-
-  .landing-nav-links a:hover {
-    color: #fff;
-  }
-
-  .landing-nav-cta {
-    padding: 12px 28px;
-    background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
-    border: none;
-    border-radius: 12px;
-    color: white;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.3s, box-shadow 0.3s;
-  }
-
-  .landing-nav-cta:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
-  }
-
-  .landing-hero {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 120px 40px 80px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .landing-hero-bg {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-  }
-
-  .landing-hero-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(100px);
-  }
-
-  .landing-hero-orb-1 {
-    width: 600px;
-    height: 600px;
-    background: #8B5CF6;
-    top: -200px;
-    left: -100px;
-    opacity: 0.3;
-  }
-
-  .landing-hero-orb-2 {
-    width: 500px;
-    height: 500px;
-    background: #06B6D4;
-    bottom: -100px;
-    right: -100px;
-    opacity: 0.25;
-  }
-
-  .landing-hero-orb-3 {
-    width: 300px;
-    height: 300px;
-    background: #D946EF;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0.15;
-  }
-
-  .landing-hero-content {
-    max-width: 1200px;
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
-    align-items: center;
-    position: relative;
-    z-index: 1;
-  }
-
-  .landing-hero-text {
-    animation: slide-in-left 1s ease;
-  }
-
-  .landing-hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    border-radius: 30px;
-    margin-bottom: 24px;
-  }
-
-  .landing-hero-badge-icon {
-    width: 18px;
-    height: 18px;
-    background: #10B981;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    color: #fff;
-  }
-
-  .landing-hero-badge-text {
-    font-size: 13px;
-    color: #10B981;
-    font-weight: 600;
-  }
-
-  .landing-hero h1 {
-    font-size: 56px;
-    font-weight: 700;
-    line-height: 1.1;
-    margin-bottom: 24px;
-  }
-
-  .landing-hero h1 span {
-    background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .landing-hero-description {
-    font-size: 18px;
-    color: #A1A1AA;
-    margin-bottom: 40px;
-    max-width: 500px;
-    line-height: 1.8;
-  }
-
-  .landing-hero-buttons {
-    display: flex;
-    gap: 16px;
-  }
-
-  .landing-btn-primary {
-    padding: 16px 32px;
-    background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
-    border: none;
-    border-radius: 14px;
-    color: white;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.3s, box-shadow 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .landing-btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 40px rgba(139, 92, 246, 0.4);
-  }
-
-  .landing-btn-secondary {
-    padding: 16px 32px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 14px;
-    color: #fff;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.3s, border-color 0.3s;
-    backdrop-filter: blur(10px);
-  }
-
-  .landing-btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-  }
-
-  .landing-hero-visual {
-    position: relative;
-    animation: slide-in-right 1s ease;
-  }
-
-  .landing-phone-mockup {
-    position: relative;
-    width: 100%;
-    max-width: 340px;
-    margin: 0 auto;
-    animation: float 6s ease-in-out infinite;
-  }
-
-  .landing-phone-frame {
-    background: #12121a;
-    border-radius: 40px;
-    padding: 12px;
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 50px 100px rgba(0, 0, 0, 0.5);
-  }
-
-  .landing-phone-screen {
-    background: #0a0a0f;
-    border-radius: 32px;
-    overflow: hidden;
-    aspect-ratio: 9/19;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .landing-phone-notch {
-    position: absolute;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100px;
-    height: 28px;
-    background: #0a0a0f;
-    border-radius: 20px;
-    z-index: 10;
-  }
-
-  .landing-trust {
-    padding: 60px 40px;
-    background: rgba(255, 255, 255, 0.02);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  .landing-trust-container {
-    max-width: 1000px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
-    text-align: center;
-  }
-
-  .landing-trust-item {
-    padding: 24px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    transition: transform 0.3s, border-color 0.3s;
-  }
-
-  .landing-trust-item:hover {
-    transform: translateY(-4px);
-    border-color: rgba(139, 92, 246, 0.3);
-  }
-
-  .landing-trust-item-icon {
-    font-size: 36px;
-    margin-bottom: 12px;
-  }
-
-  .landing-trust-item p {
-    color: #A1A1AA;
-    font-size: 15px;
-    font-weight: 500;
-  }
-
-  .landing-section {
-    padding: 120px 40px;
-    position: relative;
-  }
-
-  .landing-section-header {
-    text-align: center;
-    margin-bottom: 80px;
-  }
-
-  .landing-section-tag {
-    display: inline-block;
-    padding: 8px 20px;
-    background: rgba(139, 92, 246, 0.1);
-    border: 1px solid rgba(139, 92, 246, 0.3);
-    border-radius: 30px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #8B5CF6;
-    margin-bottom: 20px;
-    letter-spacing: 1px;
-  }
-
-  .landing-section-header h2 {
-    font-size: 44px;
-    font-weight: 700;
-    margin-bottom: 20px;
-  }
-
-  .landing-section-header p {
-    color: #A1A1AA;
-    font-size: 18px;
-    max-width: 600px;
-    margin: 0 auto;
-  }
-
-  .landing-services-grid {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-  }
-
-  .landing-service-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 24px;
-    padding: 40px 32px;
-    transition: transform 0.3s, border-color 0.3s, background 0.3s;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .landing-service-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-
-  .landing-service-card:hover {
-    transform: translateY(-8px);
-    border-color: rgba(139, 92, 246, 0.3);
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  .landing-service-card:hover::before {
-    opacity: 1;
-  }
-
-  .landing-service-icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    margin-bottom: 24px;
-  }
-
-  .landing-service-card h3 {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 12px;
-  }
-
-  .landing-service-card p {
-    color: #A1A1AA;
-    font-size: 15px;
-    line-height: 1.7;
-  }
-
-  .landing-steps-container {
-    max-width: 1000px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 40px;
-    position: relative;
-  }
-
-  .landing-steps-container::before {
-    content: '';
-    position: absolute;
-    top: 40px;
-    left: 60px;
-    right: 60px;
-    height: 2px;
-    background: rgba(255, 255, 255, 0.08);
-  }
-
-  .landing-step {
-    text-align: center;
-    position: relative;
-  }
-
-  .landing-step-number {
-    width: 80px;
-    height: 80px;
-    background: #12121a;
-    border: 2px solid rgba(255, 255, 255, 0.08);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    font-weight: 700;
-    color: #8B5CF6;
-    margin: 0 auto 24px;
-    position: relative;
-    z-index: 1;
-    transition: border-color 0.3s, background 0.3s;
-  }
-
-  .landing-step:hover .landing-step-number {
-    border-color: #8B5CF6;
-    background: rgba(139, 92, 246, 0.1);
-  }
-
-  .landing-step h3 {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 12px;
-  }
-
-  .landing-step p {
-    color: #A1A1AA;
-    font-size: 14px;
-  }
-
-  .landing-ai-section {
-    background: rgba(255, 255, 255, 0.02);
-  }
-
-  .landing-ai-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
-    align-items: center;
-  }
-
-  .landing-ai-card {
-    background: rgba(217, 70, 239, 0.05);
-    border: 1px solid rgba(217, 70, 239, 0.2);
-    border-radius: 32px;
-    padding: 40px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .landing-ai-card::before {
-    content: '';
-    position: absolute;
-    top: -100px;
-    right: -100px;
-    width: 300px;
-    height: 300px;
-    background: radial-gradient(circle, rgba(217, 70, 239, 0.3) 0%, transparent 70%);
-    filter: blur(60px);
-  }
-
-  .landing-ai-avatar {
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, #D946EF 0%, #8B5CF6 100%);
-    border-radius: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 36px;
-    margin-bottom: 24px;
-    animation: pulse-glow 3s infinite;
-  }
-
-  .landing-ai-chat-demo {
-    background: #12121a;
-    border-radius: 20px;
-    padding: 20px;
-    margin-top: 24px;
-  }
-
-  .landing-ai-message {
-    padding: 16px 20px;
-    border-radius: 16px;
-    font-size: 14px;
-    margin-bottom: 12px;
-    line-height: 1.6;
-  }
-
-  .landing-ai-message.user {
-    background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
-    margin-left: 40px;
-  }
-
-  .landing-ai-message.bot {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    margin-right: 40px;
-  }
-
-  .landing-ai-text h2 {
-    font-size: 44px;
-    font-weight: 700;
-    margin-bottom: 24px;
-  }
-
-  .landing-ai-text h2 span {
-    background: linear-gradient(135deg, #D946EF 0%, #8B5CF6 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .landing-ai-text p {
-    color: #A1A1AA;
-    font-size: 18px;
-    line-height: 1.8;
-    margin-bottom: 32px;
-  }
-
-  .landing-ai-features {
-    list-style: none;
-  }
-
-  .landing-ai-features li {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 16px;
-    font-size: 16px;
-  }
-
-  .landing-ai-features li::before {
-    content: '✓';
-    width: 28px;
-    height: 28px;
-    background: rgba(16, 185, 129, 0.15);
-    color: #10B981;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    font-weight: bold;
-    flex-shrink: 0;
-  }
-
-  .landing-cta {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .landing-cta-bg {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
-    opacity: 0.1;
-  }
-
-  .landing-cta-content {
-    max-width: 800px;
-    margin: 0 auto;
-    text-align: center;
-    position: relative;
-    z-index: 1;
-  }
-
-  .landing-cta h2 {
-    font-size: 48px;
-    font-weight: 700;
-    margin-bottom: 24px;
-  }
-
-  .landing-cta p {
-    color: #A1A1AA;
-    font-size: 20px;
-    margin-bottom: 40px;
-  }
-
-  .landing-cta-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-  }
-
-  .landing-footer {
-    padding: 60px 40px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  .landing-footer-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .landing-footer-logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .landing-footer-text {
-    color: #71717A;
-    font-size: 14px;
-  }
-
-  .landing-footer-links {
-    display: flex;
-    gap: 32px;
-  }
-
-  .landing-footer-links a {
-    color: #A1A1AA;
-    text-decoration: none;
-    font-size: 14px;
-    transition: color 0.3s;
-    cursor: pointer;
-  }
-
-  .landing-footer-links a:hover {
-    color: #fff;
-  }
-
-  .landing-cac-badge {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 16px;
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    border-radius: 10px;
-  }
-
-  .landing-cac-badge span {
-    font-size: 12px;
-    color: #10B981;
-    font-weight: 600;
-  }
-
-  .landing-cac-badge small {
-    display: block;
-    font-size: 11px;
-    color: #A1A1AA;
-  }
-
-  .landing-copyright {
-    text-align: center;
-    margin-top: 40px;
-    color: #71717A;
-    font-size: 13px;
-  }
-
-  /* Mobile Responsive */
-  @media (max-width: 1024px) {
-    .landing-hero-content {
-      grid-template-columns: 1fr;
-      text-align: center;
-      gap: 60px;
-    }
-
-    .landing-hero-text { order: 1; }
-    .landing-hero-visual { order: 0; }
-    .landing-hero h1 { font-size: 42px; }
-    .landing-hero-description { margin: 0 auto 40px; }
-    .landing-hero-buttons { justify-content: center; }
-    .landing-services-grid { grid-template-columns: repeat(2, 1fr); }
-    .landing-steps-container { grid-template-columns: repeat(2, 1fr); gap: 60px; }
-    .landing-steps-container::before { display: none; }
-    .landing-ai-content { grid-template-columns: 1fr; gap: 60px; }
-    .landing-trust-container { grid-template-columns: repeat(2, 1fr); }
-  }
-
-  @media (max-width: 768px) {
-    .landing-nav { padding: 16px 20px; }
-    .landing-nav-links { display: none; }
-    .landing-hero { padding: 100px 20px 60px; }
-    .landing-hero h1 { font-size: 32px; }
-    .landing-hero-buttons { flex-direction: column; align-items: center; }
-    .landing-section-header h2, .landing-ai-text h2, .landing-cta h2 { font-size: 32px; }
-    .landing-services-grid { grid-template-columns: 1fr; }
-    .landing-steps-container { grid-template-columns: 1fr; }
-    .landing-footer-content { flex-direction: column; gap: 24px; text-align: center; }
-    .landing-footer-links { flex-wrap: wrap; justify-content: center; }
-    .landing-section { padding: 80px 20px; }
-    .landing-cta-buttons { flex-direction: column; align-items: center; }
-  }
-`;
-
-export default function Landing() {
+// Animated Logo Component
+const PayEngineLogo = ({ size = 48 }) => (
+  <div style={{
+    width: size,
+    height: size,
+    background: 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)',
+    borderRadius: size * 0.25,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 8px 32px rgba(139, 92, 246, 0.35)',
+  }}>
+    <svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="none">
+      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" stroke="white" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  </div>
+);
+
+// Feature Card Component
+const FeatureCard = ({ icon, title, desc, delay }) => (
+  <div className="feature-card" style={{ animationDelay: `${delay}ms` }}>
+    <div className="feature-icon">{icon}</div>
+    <h3>{title}</h3>
+    <p>{desc}</p>
+  </div>
+);
+
+// Stat Counter Component
+const StatItem = ({ value, label }) => (
+  <div className="stat-item">
+    <span className="stat-value">{value}</span>
+    <span className="stat-label">{label}</span>
+  </div>
+);
+
+export default function Welcome() {
   const navigate = useNavigate();
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    // Inject styles
-    const styleId = 'landing-page-styles';
-    if (!document.getElementById(styleId)) {
-      const styleSheet = document.createElement('style');
-      styleSheet.id = styleId;
-      styleSheet.textContent = landingStyles;
-      document.head.appendChild(styleSheet);
-    }
-
-    // Scroll animation observer
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-
-    document.querySelectorAll('.landing-animate').forEach(el => observer.observe(el));
-
-    return () => {
-      observer.disconnect();
-      const existingStyle = document.getElementById(styleId);
-      if (existingStyle) existingStyle.remove();
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollToSection = (id) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const services = [
-    { icon: '📱', title: 'Instant Airtime', desc: 'Top up any Nigerian network instantly — MTN, GLO, Airtel, 9mobile. Starting from just ₦50 with automatic delivery.', color: 'rgba(139, 92, 246, 0.15)', textColor: '#8B5CF6' },
-    { icon: '📶', title: 'Data Bundles', desc: '40+ affordable data plans across all networks. SME, Corporate Gifting, and Awoof data at unbeatable prices.', color: 'rgba(6, 182, 212, 0.15)', textColor: '#06B6D4' },
-    { icon: '⚡', title: 'Electricity Bills', desc: 'Pay for prepaid or postpaid meters across all DISCOs — IKEDC, EKEDC, AEDC, and more. Get tokens instantly.', color: 'rgba(251, 191, 36, 0.15)', textColor: '#FBBF24' },
-    { icon: '📺', title: 'Cable TV', desc: 'Subscribe to DStv, GOtv, and Startimes. All bouquets available with instant activation.', color: 'rgba(236, 72, 153, 0.15)', textColor: '#EC4899' },
-    { icon: '🛡️', title: 'KYC Verification', desc: 'Verify NIN, BVN, and phone numbers instantly. Perfect for businesses, HR departments, and compliance needs.', color: 'rgba(16, 185, 129, 0.15)', textColor: '#10B981' },
-    { icon: '💳', title: 'Virtual Accounts', desc: 'Get a dedicated bank account for instant wallet funding. Transfer from any bank and your wallet is credited automatically.', color: 'rgba(217, 70, 239, 0.15)', textColor: '#D946EF' },
-  ];
-
-  const steps = [
-    { num: '1', title: 'Create Account', desc: 'Sign up with your email and phone number. It takes less than a minute.' },
-    { num: '2', title: 'Fund Wallet', desc: 'Transfer to your virtual account or use card payment to add funds.' },
-    { num: '3', title: 'Choose Service', desc: 'Select from airtime, data, bills, cable TV, or KYC verification.' },
-    { num: '4', title: 'One Tap Done', desc: 'Complete your transaction instantly. Get confirmation immediately.' },
-  ];
-
-  const trustItems = [
-    { icon: '🔒', text: 'Bank-Grade Security' },
-    { icon: '⚡', text: 'Instant Delivery' },
-    { icon: '🤖', text: 'AI-Powered Support' },
-    { icon: '✅', text: 'CAC Registered' },
+  const features = [
+    { icon: '📱', title: 'Instant Airtime', desc: 'Top up MTN, GLO, Airtel, 9mobile in seconds' },
+    { icon: '📶', title: 'Cheap Data', desc: 'Best data prices across all networks' },
+    { icon: '⚡', title: 'Pay Bills', desc: 'Electricity, cable TV, and more' },
+    { icon: '🛡️', title: 'KYC Verification', desc: 'Verify NIN & BVN instantly' },
+    { icon: '🤖', title: 'AI Assistant', desc: 'Chat to make transactions' },
+    { icon: '💳', title: 'Virtual Account', desc: 'Fund wallet via bank transfer' },
   ];
 
   return (
-    <div className="landing-page">
-      {/* Beta Badge */}
-      <div className="landing-beta-badge">BETA</div>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
 
-      {/* Navigation */}
-      <nav className="landing-nav">
-        <div className="landing-logo">
-          <OneTapLogo size={44} />
-          <span className="landing-logo-text">OneTap</span>
-        </div>
-        <ul className="landing-nav-links">
-          <li><a onClick={() => scrollToSection('services')}>Services</a></li>
-          <li><a onClick={() => scrollToSection('how-it-works')}>How It Works</a></li>
-          <li><a onClick={() => scrollToSection('ai')}>PAY ENGINE</a></li>
-          <li><a onClick={() => scrollToSection('contact')}>Contact</a></li>
-        </ul>
-        <button className="landing-nav-cta" onClick={() => navigate('/auth')}>Open App</button>
-      </nav>
+        .welcome-page {
+          font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+          background: #050508;
+          color: #fff;
+          min-height: 100vh;
+          overflow-x: hidden;
+        }
 
-      {/* Hero Section */}
-      <section className="landing-hero">
-        <div className="landing-hero-bg">
-          <div className="landing-hero-orb landing-hero-orb-1" />
-          <div className="landing-hero-orb landing-hero-orb-2" />
-          <div className="landing-hero-orb landing-hero-orb-3" />
+        /* Animated Background */
+        .bg-gradient {
+          position: fixed;
+          inset: 0;
+          z-index: 0;
+          overflow: hidden;
+          pointer-events: none;
+        }
+
+        .bg-orb {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(120px);
+          animation: float 20s ease-in-out infinite;
+        }
+
+        .bg-orb-1 {
+          width: 600px;
+          height: 600px;
+          background: #8B5CF6;
+          top: -20%;
+          left: -10%;
+          opacity: 0.15;
+        }
+
+        .bg-orb-2 {
+          width: 500px;
+          height: 500px;
+          background: #06B6D4;
+          bottom: -10%;
+          right: -10%;
+          opacity: 0.12;
+          animation-delay: -10s;
+        }
+
+        .bg-orb-3 {
+          width: 400px;
+          height: 400px;
+          background: #D946EF;
+          top: 40%;
+          right: 20%;
+          opacity: 0.08;
+          animation-delay: -5s;
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(30px, -30px) scale(1.05); }
+          50% { transform: translate(-20px, 20px) scale(0.95); }
+          75% { transform: translate(20px, 30px) scale(1.02); }
+        }
+
+        /* Grid Pattern */
+        .bg-grid {
+          position: fixed;
+          inset: 0;
+          background-image: 
+            linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px);
+          background-size: 60px 60px;
+          z-index: 0;
+          pointer-events: none;
+        }
+
+        /* Navigation */
+        .nav {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 100;
+          padding: 16px 24px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          transition: all 0.3s ease;
+        }
+
+        .nav.scrolled {
+          background: rgba(5, 5, 8, 0.85);
+          backdrop-filter: blur(20px);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .nav-brand {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .nav-brand-text {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .nav-brand-name {
+          font-size: 22px;
+          font-weight: 800;
+          background: linear-gradient(135deg, #fff 0%, #A1A1AA 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          letter-spacing: -0.5px;
+        }
+
+        .nav-brand-sub {
+          font-size: 10px;
+          color: #71717A;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+        }
+
+        .nav-btn {
+          padding: 12px 28px;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 12px;
+          color: #fff;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+          background: rgba(255, 255, 255, 0.12);
+          transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          padding: 120px 24px 80px;
+          position: relative;
+          z-index: 1;
+        }
+
+        .hero-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 16px;
+          background: rgba(16, 185, 129, 0.1);
+          border: 1px solid rgba(16, 185, 129, 0.25);
+          border-radius: 100px;
+          margin-bottom: 32px;
+          animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .hero-badge-dot {
+          width: 8px;
+          height: 8px;
+          background: #10B981;
+          border-radius: 50%;
+          animation: pulse 2s infinite;
+        }
+
+        .hero-badge-text {
+          font-size: 13px;
+          color: #10B981;
+          font-weight: 600;
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        .hero-title {
+          font-size: clamp(40px, 8vw, 72px);
+          font-weight: 800;
+          line-height: 1.05;
+          margin-bottom: 24px;
+          animation: fadeInUp 0.8s ease 0.1s forwards;
+          opacity: 0;
+        }
+
+        .hero-title-gradient {
+          background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 50%, #D946EF 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-size: 200% 200%;
+          animation: gradientShift 5s ease infinite;
+        }
+
+        @keyframes gradientShift {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+
+        .hero-subtitle {
+          font-size: clamp(16px, 3vw, 20px);
+          color: #A1A1AA;
+          max-width: 600px;
+          margin: 0 auto 48px;
+          line-height: 1.7;
+          animation: fadeInUp 0.8s ease 0.2s forwards;
+          opacity: 0;
+        }
+
+        .hero-cta {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 16px;
+          animation: fadeInUp 0.8s ease 0.3s forwards;
+          opacity: 0;
+        }
+
+        .btn-primary {
+          padding: 18px 48px;
+          background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+          border: none;
+          border-radius: 16px;
+          color: #fff;
+          font-size: 17px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          box-shadow: 0 8px 32px rgba(139, 92, 246, 0.35);
+        }
+
+        .btn-primary:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 16px 48px rgba(139, 92, 246, 0.45);
+        }
+
+        .btn-primary svg {
+          transition: transform 0.3s ease;
+        }
+
+        .btn-primary:hover svg {
+          transform: translateX(4px);
+        }
+
+        .hero-cta-sub {
+          font-size: 13px;
+          color: #71717A;
+        }
+
+        .hero-cta-sub span {
+          color: #10B981;
+          font-weight: 600;
+        }
+
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Stats Section */
+        .stats {
+          display: flex;
+          justify-content: center;
+          gap: 48px;
+          padding: 60px 24px;
+          border-top: 1px solid rgba(255, 255, 255, 0.06);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+          background: rgba(255, 255, 255, 0.02);
+          position: relative;
+          z-index: 1;
+          flex-wrap: wrap;
+        }
+
+        .stat-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .stat-value {
+          font-size: 36px;
+          font-weight: 800;
+          background: linear-gradient(135deg, #fff 0%, #8B5CF6 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+          font-size: 14px;
+          color: #71717A;
+        }
+
+        /* Features Section */
+        .features {
+          padding: 100px 24px;
+          position: relative;
+          z-index: 1;
+        }
+
+        .section-header {
+          text-align: center;
+          margin-bottom: 64px;
+        }
+
+        .section-tag {
+          display: inline-block;
+          padding: 8px 20px;
+          background: rgba(139, 92, 246, 0.1);
+          border: 1px solid rgba(139, 92, 246, 0.25);
+          border-radius: 100px;
+          font-size: 12px;
+          font-weight: 700;
+          color: #8B5CF6;
+          letter-spacing: 2px;
+          margin-bottom: 20px;
+        }
+
+        .section-title {
+          font-size: clamp(28px, 5vw, 42px);
+          font-weight: 800;
+          margin-bottom: 16px;
+        }
+
+        .section-desc {
+          font-size: 17px;
+          color: #A1A1AA;
+          max-width: 500px;
+          margin: 0 auto;
+        }
+
+        .features-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 24px;
+          max-width: 1100px;
+          margin: 0 auto;
+        }
+
+        .feature-card {
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          border-radius: 20px;
+          padding: 32px;
+          transition: all 0.4s ease;
+          animation: fadeInUp 0.6s ease forwards;
+          opacity: 0;
+        }
+
+        .feature-card:hover {
+          background: rgba(255, 255, 255, 0.06);
+          border-color: rgba(139, 92, 246, 0.3);
+          transform: translateY(-8px);
+        }
+
+        .feature-icon {
+          font-size: 40px;
+          margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+          font-size: 20px;
+          font-weight: 700;
+          margin-bottom: 10px;
+        }
+
+        .feature-card p {
+          font-size: 15px;
+          color: #A1A1AA;
+          line-height: 1.6;
+        }
+
+        /* AI Section */
+        .ai-section {
+          padding: 100px 24px;
+          background: rgba(217, 70, 239, 0.03);
+          border-top: 1px solid rgba(217, 70, 239, 0.1);
+          border-bottom: 1px solid rgba(217, 70, 239, 0.1);
+          position: relative;
+          z-index: 1;
+        }
+
+        .ai-content {
+          max-width: 1000px;
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 60px;
+          align-items: center;
+        }
+
+        .ai-demo {
+          background: #0a0a0f;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 24px;
+          padding: 24px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .ai-demo-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 20px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .ai-avatar {
+          width: 44px;
+          height: 44px;
+          background: linear-gradient(135deg, #D946EF 0%, #8B5CF6 100%);
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 22px;
+        }
+
+        .ai-demo-header-text h4 {
+          font-size: 15px;
+          font-weight: 700;
+        }
+
+        .ai-demo-header-text p {
+          font-size: 12px;
+          color: #71717A;
+        }
+
+        .ai-messages {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .ai-msg {
+          padding: 14px 18px;
+          border-radius: 16px;
+          font-size: 14px;
+          line-height: 1.5;
+          max-width: 85%;
+          animation: msgSlide 0.5s ease forwards;
+        }
+
+        .ai-msg.bot {
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          align-self: flex-start;
+        }
+
+        .ai-msg.user {
+          background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+          align-self: flex-end;
+        }
+
+        @keyframes msgSlide {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ai-text h2 {
+          font-size: clamp(28px, 5vw, 40px);
+          font-weight: 800;
+          margin-bottom: 20px;
+        }
+
+        .ai-text h2 span {
+          background: linear-gradient(135deg, #D946EF 0%, #8B5CF6 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        .ai-text p {
+          font-size: 17px;
+          color: #A1A1AA;
+          line-height: 1.8;
+          margin-bottom: 28px;
+        }
+
+        .ai-features {
+          list-style: none;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        }
+
+        .ai-features li {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 15px;
+        }
+
+        .ai-features li::before {
+          content: '✓';
+          width: 24px;
+          height: 24px;
+          background: rgba(16, 185, 129, 0.15);
+          color: #10B981;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          font-weight: 700;
+        }
+
+        /* CTA Section */
+        .cta {
+          padding: 120px 24px;
+          text-align: center;
+          position: relative;
+          z-index: 1;
+        }
+
+        .cta-box {
+          max-width: 700px;
+          margin: 0 auto;
+          padding: 60px 40px;
+          background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%);
+          border: 1px solid rgba(139, 92, 246, 0.2);
+          border-radius: 32px;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .cta-box::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+          animation: rotateBg 20s linear infinite;
+        }
+
+        @keyframes rotateBg {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        .cta-content {
+          position: relative;
+          z-index: 1;
+        }
+
+        .cta h2 {
+          font-size: clamp(28px, 5vw, 40px);
+          font-weight: 800;
+          margin-bottom: 16px;
+        }
+
+        .cta p {
+          font-size: 17px;
+          color: #A1A1AA;
+          margin-bottom: 32px;
+        }
+
+        /* Footer */
+        .footer {
+          padding: 40px 24px;
+          border-top: 1px solid rgba(255, 255, 255, 0.06);
+          position: relative;
+          z-index: 1;
+        }
+
+        .footer-content {
+          max-width: 1100px;
+          margin: 0 auto;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 24px;
+        }
+
+        .footer-brand {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .footer-brand-text {
+          font-size: 18px;
+          font-weight: 700;
+        }
+
+        .footer-brand-sub {
+          font-size: 11px;
+          color: #71717A;
+          letter-spacing: 1px;
+        }
+
+        .footer-links {
+          display: flex;
+          gap: 32px;
+        }
+
+        .footer-links a {
+          color: #71717A;
+          text-decoration: none;
+          font-size: 14px;
+          transition: color 0.3s;
+          cursor: pointer;
+        }
+
+        .footer-links a:hover {
+          color: #fff;
+        }
+
+        .footer-cac {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 10px 16px;
+          background: rgba(16, 185, 129, 0.08);
+          border: 1px solid rgba(16, 185, 129, 0.2);
+          border-radius: 10px;
+        }
+
+        .footer-cac-icon {
+          font-size: 18px;
+        }
+
+        .footer-cac-text {
+          font-size: 11px;
+          color: #10B981;
+          font-weight: 600;
+        }
+
+        .footer-cac-num {
+          font-size: 10px;
+          color: #71717A;
+        }
+
+        .footer-bottom {
+          text-align: center;
+          margin-top: 40px;
+          padding-top: 24px;
+          border-top: 1px solid rgba(255, 255, 255, 0.04);
+          color: #52525B;
+          font-size: 13px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 900px) {
+          .ai-content {
+            grid-template-columns: 1fr;
+            gap: 40px;
+          }
+          .ai-demo { order: 1; }
+          .ai-text { order: 0; text-align: center; }
+          .ai-features { align-items: center; }
+        }
+
+        @media (max-width: 600px) {
+          .nav { padding: 12px 16px; }
+          .nav-brand-name { font-size: 18px; }
+          .nav-btn { padding: 10px 20px; font-size: 13px; }
+          .hero { padding: 100px 20px 60px; }
+          .stats { gap: 32px; padding: 40px 20px; }
+          .stat-value { font-size: 28px; }
+          .features, .ai-section, .cta { padding: 60px 20px; }
+          .footer-content { flex-direction: column; text-align: center; }
+          .footer-links { flex-wrap: wrap; justify-content: center; gap: 20px; }
+        }
+      `}</style>
+
+      <div className="welcome-page">
+        {/* Animated Background */}
+        <div className="bg-gradient">
+          <div className="bg-orb bg-orb-1" />
+          <div className="bg-orb bg-orb-2" />
+          <div className="bg-orb bg-orb-3" />
         </div>
-        <div className="landing-hero-content">
-          <div className="landing-hero-text">
-            <div className="landing-hero-badge">
-              <div className="landing-hero-badge-icon">✓</div>
-              <span className="landing-hero-badge-text">CAC Registered · RC 9247692</span>
-            </div>
-            <h1>All Your Payments,<br /><span>One Tap Away</span></h1>
-            <p className="landing-hero-description">
-              Buy airtime, data bundles, pay electricity bills, subscribe to cable TV, and verify KYC — all from one super-app. Powered by AI for the smartest financial experience.
-            </p>
-            <div className="landing-hero-buttons">
-              <button className="landing-btn-primary" onClick={() => navigate('/auth')}>
-                <span>Get Started Free</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </button>
-              <button className="landing-btn-secondary" onClick={() => scrollToSection('how-it-works')}>
-                Learn More
-              </button>
+        <div className="bg-grid" />
+
+        {/* Navigation */}
+        <nav className={`nav ${scrolled ? 'scrolled' : ''}`}>
+          <div className="nav-brand">
+            <PayEngineLogo size={42} />
+            <div className="nav-brand-text">
+              <span className="nav-brand-name">PayEngine</span>
+              <span className="nav-brand-sub">by OneTap --- a Subsidiary of ChiVera</span>
             </div>
           </div>
-          <div className="landing-hero-visual">
-            <div className="landing-phone-mockup">
-              <div className="landing-phone-frame">
-                <div className="landing-phone-notch" />
-                <div className="landing-phone-screen">
-                  <OneTapLogo size={80} />
+          <button className="nav-btn" onClick={() => navigate('/auth')}>
+            Sign In
+          </button>
+        </nav>
+
+        {/* Hero Section */}
+        <section className="hero">
+          <div className="hero-badge">
+            <div className="hero-badge-dot" />
+            <span className="hero-badge-text">CAC Registered · RC 9247692</span>
+          </div>
+          
+          <h1 className="hero-title">
+            Payments Made<br />
+            <span className="hero-title-gradient">Ridiculously Simple</span>
+          </h1>
+          
+          <p className="hero-subtitle">
+            PayEngine by OneTap — Nigeria's smartest payment platform. Buy airtime, data, pay bills, 
+            and verify KYC with one tap. Powered by AI for the fastest experience.
+          </p>
+
+          <div className="hero-cta">
+            <button className="btn-primary" onClick={() => navigate('/auth')}>
+              Get Started — It's Free
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </button>
+            <p className="hero-cta-sub">
+              <span>✓</span> No fees to sign up · Instant wallet funding
+            </p>
+          </div>
+        </section>
+
+        {/* Stats */}
+        <section className="stats">
+          <StatItem value="50K+" label="Transactions" />
+          <StatItem value="10K+" label="Happy Users" />
+          <StatItem value="99.9%" label="Uptime" />
+          <StatItem value="<3s" label="Delivery Time" />
+        </section>
+
+        {/* Features */}
+        <section className="features">
+          <div className="section-header">
+            <span className="section-tag">SERVICES</span>
+            <h2 className="section-title">Everything in One App</h2>
+            <p className="section-desc">All your digital payments, simplified and secured.</p>
+          </div>
+          <div className="features-grid">
+            {features.map((f, i) => (
+              <FeatureCard key={i} icon={f.icon} title={f.title} desc={f.desc} delay={i * 100} />
+            ))}
+          </div>
+        </section>
+
+        {/* AI Section */}
+        <section className="ai-section">
+          <div className="ai-content">
+            <div className="ai-text">
+              <span className="section-tag">AI ASSISTANT</span>
+              <h2>Meet <span>PAY ENGINE</span></h2>
+              <p>
+                Our highly trained AI model understands what you need. Just type "send 2GB MTN to 0801..." 
+                and watch the magic happen. It's like having a personal assistant for all your payments.
+              </p>
+              <ul className="ai-features">
+                <li>Friendly and Interactive AI Engine</li>
+                <li>Instant transaction execution</li>
+                <li>24/7 smart support</li>
+                <li>Nigerian Pidgin supported 🇳🇬</li>
+              </ul>
+            </div>
+            <div className="ai-demo">
+              <div className="ai-demo-header">
+                <div className="ai-avatar">✨</div>
+                <div className="ai-demo-header-text">
+                  <h4>PAY ENGINE</h4>
+                  <p>Online · AI Assistant</p>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Badges */}
-      <section className="landing-trust">
-        <div className="landing-trust-container">
-          {trustItems.map((item, i) => (
-            <div key={i} className="landing-trust-item landing-animate">
-              <div className="landing-trust-item-icon">{item.icon}</div>
-              <p>{item.text}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Services Section */}
-      <section className="landing-section" id="services">
-        <div className="landing-section-header landing-animate">
-          <span className="landing-section-tag">SERVICES</span>
-          <h2>Everything You Need, One App</h2>
-          <p>From airtime to KYC verification, we've got all your digital payment needs covered with the best rates in Nigeria.</p>
-        </div>
-        <div className="landing-services-grid">
-          {services.map((service, i) => (
-            <div key={i} className="landing-service-card landing-animate">
-              <div className="landing-service-icon" style={{ background: service.color, color: service.textColor }}>
-                {service.icon}
+              <div className="ai-messages">
+                <div className="ai-msg bot">Hey! 👋 How can I help you today?</div>
+                <div className="ai-msg user">Buy 2GB MTN for 08012345678</div>
+                <div className="ai-msg bot">Done! ✅ 2GB MTN sent to 08012345678. Balance: ₦4,500</div>
               </div>
-              <h3>{service.title}</h3>
-              <p>{service.desc}</p>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+        </section>
 
-      {/* How It Works */}
-      <section className="landing-section landing-ai-section" id="how-it-works">
-        <div className="landing-section-header landing-animate">
-          <span className="landing-section-tag">HOW IT WORKS</span>
-          <h2>Start in 4 Simple Steps</h2>
-          <p>Getting started with OneTap is quick and easy. No paperwork, no hassle.</p>
-        </div>
-        <div className="landing-steps-container">
-          {steps.map((step, i) => (
-            <div key={i} className="landing-step landing-animate">
-              <div className="landing-step-number">{step.num}</div>
-              <h3>{step.title}</h3>
-              <p>{step.desc}</p>
+        {/* CTA */}
+        <section className="cta">
+          <div className="cta-box">
+            <div className="cta-content">
+              <h2>Ready to Start?</h2>
+              <p>Join thousands of Nigerians enjoying seamless payments every day.</p>
+              <button className="btn-primary" onClick={() => navigate('/auth')}>
+                Create Free Account
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </button>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+        </section>
 
-      {/* AI Section */}
-      <section className="landing-section" id="ai">
-        <div className="landing-ai-content">
-          <div className="landing-ai-card landing-animate">
-            <div className="landing-ai-avatar">✨</div>
-            <h3 style={{ fontSize: 24, marginBottom: 8 }}>PAY ENGINE</h3>
-            <p style={{ color: '#A1A1AA', marginBottom: 0 }}>Your AI-powered assistant</p>
-            <div className="landing-ai-chat-demo">
-              <div className="landing-ai-message bot">Hey! 👋 I'm PAY ENGINE. How can I help you today?</div>
-              <div className="landing-ai-message user">I need 2GB MTN data for 08012345678</div>
-              <div className="landing-ai-message bot">Done! ✅ 2GB MTN data sent to 08012345678. Your new balance is ₦4,500.</div>
+        {/* Footer */}
+        <footer className="footer">
+          <div className="footer-content">
+            <div className="footer-brand">
+              <PayEngineLogo size={36} />
+              <div>
+                <div className="footer-brand-text">PayEngine</div>
+                <div className="footer-brand-sub">by OneTap, a subsidiary of CHIVERA</div>
+              </div>
+            </div>
+            <div className="footer-links">
+              <a>Privacy</a>
+              <a>Terms</a>
+              <a onClick={() => window.location.href = 'mailto:chiblinks3@gmail.com'}>Contact</a>
+            </div>
+            <div className="footer-cac">
+              <span className="footer-cac-icon">🛡️</span>
+              <div>
+                <div className="footer-cac-text">CAC VERIFIED</div>
+                <div className="footer-cac-num">RC: 9247692</div>
+              </div>
             </div>
           </div>
-          <div className="landing-ai-text landing-animate">
-            <span className="landing-section-tag">AI ASSISTANT</span>
-            <h2>Meet <span>PAY ENGINE</span></h2>
-            <p>Our GPT-4 powered AI assistant understands natural language. Just tell it what you need — buy airtime, check balance, pay bills — and it handles everything for you.</p>
-            <ul className="landing-ai-features">
-              <li>Natural language transactions</li>
-              <li>Nigerian Pidgin English support</li>
-              <li>Instant transaction execution</li>
-              <li>24/7 intelligent support</li>
-              <li>Transaction history & insights</li>
-            </ul>
+          <div className="footer-bottom">
+            © 2026 PayEngine by OneTap (CHIVERA). All rights reserved.
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="landing-section landing-cta" id="contact">
-        <div className="landing-cta-bg" />
-        <div className="landing-cta-content landing-animate">
-          <h2>Ready to Simplify Your Payments?</h2>
-          <p>Be among the first to experience the future of digital payments in Nigeria.</p>
-          <div className="landing-cta-buttons">
-            <button className="landing-btn-primary" onClick={() => navigate('/auth')}>
-              <span>Join the Beta</span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <button className="landing-btn-secondary" onClick={() => window.location.href = 'mailto:chiblinks3@gmail.com'}>
-              Contact Us
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="landing-footer">
-        <div className="landing-footer-content">
-          <div className="landing-footer-logo">
-            <OneTapLogo size={40} />
-            <div>
-              <span className="landing-logo-text" style={{ fontSize: 20 }}>OneTap</span>
-              <p className="landing-footer-text">by CHIVERA</p>
-            </div>
-          </div>
-          <div className="landing-footer-links">
-            <a>Privacy Policy</a>
-            <a>Terms of Service</a>
-            <a>Support</a>
-            <a onClick={() => window.location.href = 'mailto:chiblinks3@gmail.com'}>Contact</a>
-          </div>
-          <div className="landing-cac-badge">
-            <span>🛡️</span>
-            <div>
-              <span>CAC APPROVED ✓</span>
-              <small>RC: 9247692</small>
-            </div>
-          </div>
-        </div>
-        <p className="landing-copyright">© 2026 OneTap by CHIVERA. All rights reserved.</p>
-      </footer>
-    </div>
+        </footer>
+      </div>
+    </>
   );
 }
