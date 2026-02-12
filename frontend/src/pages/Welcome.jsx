@@ -796,8 +796,7 @@ export default function Welcome() {
 
         {/* Stats */}
         <section className="stats">
-          <StatItem value="50K+" label="Transactions" />
-          <StatItem value="10K+" label="Happy Users" />
+          <StatItem value="30%+" label="Cheaper than most apps" />
           <StatItem value="99.9%" label="Uptime" />
           <StatItem value="<3s" label="Delivery Time" />
         </section>
