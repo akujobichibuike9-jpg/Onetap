@@ -286,7 +286,7 @@ export default function Auth() {
               <span style={{ color: C.success, fontWeight: 700, fontSize: 11 }}>CAC APPROVED</span>
               <span style={{ background: C.success, color: '#fff', fontSize: 8, padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>✓</span>
             </div>
-            <span style={{ color: C.textSec, fontSize: 10 }}>RC: 9247692</span>
+            <span style={{ color: C.textSec, fontSize: 10 }}>RC:9306790 </span>
           </div>
         </div>
         <div className="logo-animated"><OneTapLogo size={100} /></div>

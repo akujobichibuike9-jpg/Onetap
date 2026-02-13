@@ -772,12 +772,12 @@ export default function Welcome() {
           </div>
           
           <h1 className="hero-title">
-            Payments Made<br />
+            VTU Payments Made<br />
             <span className="hero-title-gradient">Ridiculously Simple</span>
           </h1>
           
           <p className="hero-subtitle">
-            PayEngine by OneTap — Nigeria's smartest payment platform. Buy airtime, data, pay bills, 
+            PayEngine by OneTap — Nigeria's smartest VTU payment platform. Buy airtime, data, pay bills, 
             and verify KYC with one tap. Powered by AI for the fastest experience.
           </p>
 
