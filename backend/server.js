@@ -332,8 +332,8 @@ async function createMonnifyVirtualAccount(user, bvn = null, nin = null) {
       contractCode: MONNIFY_CONTRACT_CODE,
       customerEmail: user.email,
       customerName: accountName,
-      getAllAvailableBanks: false,
-      preferredBanks: ['035'] // Wema Bank
+      getAllAvailableBanks: true,
+      preferredBanks: [] 
     };
     
     // Add BVN or NIN for live environment (required by Monnify Live)
