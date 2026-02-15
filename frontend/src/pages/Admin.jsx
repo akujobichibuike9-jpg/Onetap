@@ -47,6 +47,12 @@ export default function Admin() {
   // Transaction selection for bulk delete
   const [selectedTxs, setSelectedTxs] = useState([]);
 
+  // Delete account modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteConfirmEmail, setDeleteConfirmEmail] = useState('');
+  const [deleting, setDeleting] = useState(false);
+
   // SEARCH FILTER LOGIC
   const filteredTxs = txs.filter(t => 
     t.reference?.toLowerCase().includes(search.toLowerCase()) ||
@@ -141,6 +147,52 @@ export default function Admin() {
       });
       if (r.ok) { alert('Done!'); fetchData(); if (selUser) getUser(id); }
     } catch (e) { alert('Failed'); }
+  };
+
+  // DELETE USER ACCOUNT
+  const handleDeleteUser = async () => {
+    if (!deletePassword) {
+      alert('Enter admin password');
+      return;
+    }
+    
+    if (deleteConfirmEmail !== selUser.user.email) {
+      alert('Email does not match. Please type the exact email to confirm deletion.');
+      return;
+    }
+    
+    setDeleting(true);
+    
+    try {
+      const r = await fetch(`/api/admin/users/${selUser.user.id}`, {
+        method: 'DELETE',
+        headers: { 
+          'Content-Type': 'application/json', 
+          'x-admin-key': adminKey 
+        },
+        body: JSON.stringify({ 
+          password: deletePassword,
+          confirmEmail: deleteConfirmEmail
+        })
+      });
+      
+      if (r.ok) {
+        const data = await r.json();
+        alert(data.message || 'User account deleted successfully!');
+        setShowDeleteModal(false);
+        setDeletePassword('');
+        setDeleteConfirmEmail('');
+        setSelUser(null);
+        fetchData();
+      } else {
+        const data = await r.json();
+        alert(data.error || 'Failed to delete user');
+      }
+    } catch (e) {
+      alert('Failed to delete user');
+    }
+    
+    setDeleting(false);
   };
 
   // CREDIT/DEBIT USER
@@ -832,20 +884,51 @@ export default function Admin() {
             
             <div style={{ padding: 20 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
-                <div><p style={{ color: C.textMuted, fontSize: 11 }}>Name</p><p style={{ color: C.text, fontSize: 15, fontWeight: 600 }}>{selUser.user?.first_name} {selUser.user?.last_name}</p></div>
+                <div><p style={{ color: C.textMuted, fontSize: 11 }}>Name</p><p style={{ color: C.text, fontSize: 15, fontWeight: 600 }}>{selUser.user?.firstName || selUser.user?.first_name} {selUser.user?.lastName || selUser.user?.last_name}</p></div>
                 <div><p style={{ color: C.textMuted, fontSize: 11 }}>Status</p><span style={{ padding: '4px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: selUser.user?.status === 'active' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: selUser.user?.status === 'active' ? '#10b981' : '#ef4444' }}>{selUser.user?.status}</span></div>
                 <div><p style={{ color: C.textMuted, fontSize: 11 }}>Email</p><p style={{ color: C.text, fontSize: 13 }}>{selUser.user?.email}</p></div>
                 <div><p style={{ color: C.textMuted, fontSize: 11 }}>Phone</p><p style={{ color: C.text, fontSize: 13 }}>{selUser.user?.phone}</p></div>
                 <div><p style={{ color: C.textMuted, fontSize: 11 }}>Balance</p><p style={{ color: C.success, fontSize: 18, fontWeight: 700 }}>{formatNaira(selUser.user?.balance)}</p></div>
+                <div><p style={{ color: C.textMuted, fontSize: 11 }}>Joined</p><p style={{ color: C.text, fontSize: 13 }}>{selUser.user?.createdAt ? new Date(selUser.user.createdAt).toLocaleDateString() : 'N/A'}</p></div>
               </div>
               
-              <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+              {/* Virtual Account Info */}
+              {selUser.user?.virtual_account_number && (
+                <div style={{ background: C.bgGlass, borderRadius: 10, padding: 12, marginBottom: 16 }}>
+                  <p style={{ color: C.textMuted, fontSize: 11, marginBottom: 6 }}>Virtual Account</p>
+                  <p style={{ color: C.text, fontSize: 14, fontWeight: 600 }}>{selUser.user.virtual_account_number}</p>
+                  <p style={{ color: C.textSec, fontSize: 12 }}>{selUser.user.virtual_account_bank}</p>
+                </div>
+              )}
+              
+              <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
                 <button onClick={() => { setCreditAction('credit'); setShowCreditModal(true); }} style={{ flex: 1, padding: 12, borderRadius: 10, background: 'rgba(16,185,129,0.1)', color: '#10b981', border: 'none', fontWeight: 600, cursor: 'pointer' }}>💰 Credit</button>
                 <button onClick={() => { setCreditAction('debit'); setShowCreditModal(true); }} style={{ flex: 1, padding: 12, borderRadius: 10, background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: 'none', fontWeight: 600, cursor: 'pointer' }}>💸 Debit</button>
               </div>
 
-              <button onClick={() => toggleStatus(selUser.user.id, selUser.user.status === 'active' ? 'blocked' : 'active')} style={{ width: '100%', padding: 14, borderRadius: 12, border: 'none', background: selUser.user?.status === 'active' ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)', color: selUser.user?.status === 'active' ? '#ef4444' : '#10b981', fontWeight: 600, cursor: 'pointer' }}>
+              <button onClick={() => toggleStatus(selUser.user.id, selUser.user.status === 'active' ? 'blocked' : 'active')} style={{ width: '100%', padding: 14, borderRadius: 12, border: 'none', background: selUser.user?.status === 'active' ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)', color: selUser.user?.status === 'active' ? '#ef4444' : '#10b981', fontWeight: 600, cursor: 'pointer', marginBottom: 12 }}>
                 {selUser.user?.status === 'active' ? '🚫 Block User' : '✅ Unblock User'}
+              </button>
+
+              {/* DELETE ACCOUNT BUTTON */}
+              <button 
+                onClick={() => setShowDeleteModal(true)} 
+                style={{ 
+                  width: '100%', 
+                  padding: 14, 
+                  borderRadius: 12, 
+                  border: '2px solid #ef4444', 
+                  background: 'transparent', 
+                  color: '#ef4444', 
+                  fontWeight: 600, 
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8
+                }}
+              >
+                🗑️ Delete Account Permanently
               </button>
             </div>
           </div>
@@ -856,12 +939,161 @@ export default function Admin() {
       {showCreditModal && selUser && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1001, padding: 20 }}>
           <div style={{ background: C.bgCard, borderRadius: 20, width: '100%', maxWidth: 380, padding: 24 }}>
-            <h2 style={{ color: C.text, fontSize: 18, fontWeight: 700, marginBottom: 20 }}>{creditAction === 'credit' ? '💰 Credit' : '💸 Debit'} {selUser.user?.first_name}</h2>
+            <h2 style={{ color: C.text, fontSize: 18, fontWeight: 700, marginBottom: 20 }}>{creditAction === 'credit' ? '💰 Credit' : '💸 Debit'} {selUser.user?.firstName || selUser.user?.first_name}</h2>
             <input type="number" value={creditAmount} onChange={e => setCreditAmount(e.target.value)} placeholder="Amount (₦)" style={{ width: '100%', padding: 14, borderRadius: 12, background: C.bg, border: `1px solid ${C.border}`, color: C.text, marginBottom: 12, boxSizing: 'border-box' }} />
             <input type="text" value={creditReason} onChange={e => setCreditReason(e.target.value)} placeholder="Reason (e.g. Refund)" style={{ width: '100%', padding: 14, borderRadius: 12, background: C.bg, border: `1px solid ${C.border}`, color: C.text, marginBottom: 20, boxSizing: 'border-box' }} />
             <div style={{ display: 'flex', gap: 10 }}>
                 <button onClick={() => setShowCreditModal(false)} style={{ flex: 1, padding: 12, background: C.bgGlass, color: C.text, border: 'none', borderRadius: 10, cursor: 'pointer' }}>Cancel</button>
                 <button onClick={handleCreditDebit} style={{ flex: 1, padding: 12, background: C.grad1, color: '#fff', border: 'none', borderRadius: 10, fontWeight: 600, cursor: 'pointer' }}>Confirm</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE ACCOUNT MODAL */}
+      {showDeleteModal && selUser && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1002, padding: 20, overflow: 'auto' }}>
+          <div style={{ background: C.bgCard, borderRadius: 20, width: '100%', maxWidth: 420, maxHeight: '90vh', overflow: 'auto', margin: 'auto' }}>
+            <div style={{ padding: 24 }}>
+              {/* Warning Header */}
+              <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                <div style={{ 
+                  width: 60, 
+                  height: 60, 
+                  borderRadius: 16, 
+                  background: 'rgba(239,68,68,0.2)', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  margin: '0 auto 16px', 
+                  fontSize: 28 
+                }}>
+                  ⚠️
+                </div>
+                <h2 style={{ color: '#ef4444', fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Delete User Account</h2>
+                <p style={{ color: C.textSec, fontSize: 13 }}>This action is <strong style={{ color: '#ef4444' }}>permanent</strong></p>
+              </div>
+
+              {/* User Info */}
+              <div style={{ 
+                background: 'rgba(239,68,68,0.1)', 
+                border: '1px solid rgba(239,68,68,0.3)', 
+                borderRadius: 12, 
+                padding: 14, 
+                marginBottom: 16 
+              }}>
+                <p style={{ color: C.text, fontSize: 14, fontWeight: 600, marginBottom: 6 }}>
+                  {selUser.user?.firstName || selUser.user?.first_name} {selUser.user?.lastName || selUser.user?.last_name}
+                </p>
+                <p style={{ color: C.textSec, fontSize: 12 }}>📧 {selUser.user?.email}</p>
+                <p style={{ color: C.textSec, fontSize: 12 }}>📱 {selUser.user?.phone}</p>
+                <p style={{ color: C.success, fontSize: 13, fontWeight: 600, marginTop: 6 }}>💰 Balance: {formatNaira(selUser.user?.balance)}</p>
+              </div>
+
+              {/* Warning List */}
+              <div style={{ 
+                background: C.bgGlass, 
+                borderRadius: 10, 
+                padding: 12, 
+                marginBottom: 16 
+              }}>
+                <p style={{ color: '#ef4444', fontSize: 11, fontWeight: 600, marginBottom: 6 }}>This will permanently delete:</p>
+                <ul style={{ color: C.textSec, fontSize: 11, margin: 0, paddingLeft: 18, lineHeight: 1.7 }}>
+                  <li>User account and profile</li>
+                  <li>All transaction history</li>
+                  <li>Virtual account (if any)</li>
+                  <li>Activity logs for this user</li>
+                  <li>Wallet balance: <strong style={{ color: '#ef4444' }}>{formatNaira(selUser.user?.balance)}</strong></li>
+                </ul>
+              </div>
+
+              {/* Confirmation Inputs */}
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ display: 'block', color: C.textSec, fontSize: 11, marginBottom: 6 }}>
+                  Type email to confirm: <strong style={{ color: C.text }}>{selUser.user?.email}</strong>
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirmEmail}
+                  onChange={e => setDeleteConfirmEmail(e.target.value)}
+                  placeholder="Type email here..."
+                  style={{ 
+                    width: '100%', 
+                    padding: 12, 
+                    borderRadius: 10, 
+                    background: C.bg, 
+                    border: `1px solid ${deleteConfirmEmail === selUser.user?.email ? '#10b981' : C.border}`, 
+                    color: C.text, 
+                    boxSizing: 'border-box',
+                    fontSize: 13
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', color: C.textSec, fontSize: 11, marginBottom: 6 }}>
+                  Admin Password
+                </label>
+                <input
+                  type="password"
+                  value={deletePassword}
+                  onChange={e => setDeletePassword(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && deleteConfirmEmail === selUser.user?.email && handleDeleteUser()}
+                  placeholder="Enter admin password"
+                  style={{ 
+                    width: '100%', 
+                    padding: 12, 
+                    borderRadius: 10, 
+                    background: C.bg, 
+                    border: `1px solid ${C.border}`, 
+                    color: C.text, 
+                    boxSizing: 'border-box',
+                    fontSize: 13
+                  }}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button 
+                  onClick={() => { 
+                    setShowDeleteModal(false); 
+                    setDeletePassword(''); 
+                    setDeleteConfirmEmail(''); 
+                  }} 
+                  style={{ 
+                    flex: 1, 
+                    padding: 12, 
+                    background: C.bgGlass, 
+                    color: C.text, 
+                    border: 'none', 
+                    borderRadius: 10, 
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    fontSize: 13
+                  }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleDeleteUser}
+                  disabled={deleting || deleteConfirmEmail !== selUser.user?.email || !deletePassword}
+                  style={{ 
+                    flex: 1, 
+                    padding: 12, 
+                    background: (deleteConfirmEmail === selUser.user?.email && deletePassword) ? '#ef4444' : C.border, 
+                    color: '#fff', 
+                    border: 'none', 
+                    borderRadius: 10, 
+                    fontWeight: 600, 
+                    fontSize: 13,
+                    cursor: (deleteConfirmEmail === selUser.user?.email && deletePassword && !deleting) ? 'pointer' : 'not-allowed',
+                    opacity: deleting ? 0.7 : 1
+                  }}
+                >
+                  {deleting ? 'Deleting...' : '🗑️ Delete Forever'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
