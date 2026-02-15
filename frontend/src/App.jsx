@@ -2,7 +2,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 
 import api from './api';
-import InstallPWA from './components/InstallPWA';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 
 import Welcome from './pages/Welcome';
 import Maintenance from './pages/Maintenance';
@@ -229,7 +229,8 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
 
-        <InstallPWA />
+        {/* PWA Install Prompt */}
+        <PWAInstallPrompt />
       </BrowserRouter>
     </UserContext.Provider>
   );

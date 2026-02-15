@@ -1,87 +1,52 @@
 {
-  "name": "OneTap by CHIVERA",
+  "name": "OneTap - Bills & VTU",
   "short_name": "OneTap",
-  "description": "Buy airtime, data, pay bills, and verify KYC instantly",
+  "description": "Pay bills, buy airtime & data, verify KYC - all in one tap!",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0f",
   "theme_color": "#8B5CF6",
-  "orientation": "portrait-primary",
+  "orientation": "portrait",
   "scope": "/",
   "icons": [
     {
-      "src": "/icons/icon-72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-96.png",
+      "src": "/icons/favicon-96x96.png",
       "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "maskable any"
+      "type": "image/png"
     },
     {
-      "src": "/icons/icon-128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-192.png",
+      "src": "/icons/web-app-manifest-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
-      "src": "/icons/icon-384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-512.png",
+      "src": "/icons/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/icons/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
   ],
   "categories": ["finance", "utilities"],
-  "shortcuts": [
-    {
-      "name": "Buy Airtime",
-      "short_name": "Airtime",
-      "description": "Quick airtime purchase",
-      "url": "/airtime",
-      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Buy Data",
-      "short_name": "Data",
-      "description": "Quick data purchase",
-      "url": "/data",
-      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Fund Wallet",
-      "short_name": "Fund",
-      "description": "Add money to wallet",
-      "url": "/fund-wallet",
-      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
-    }
-  ],
-  "related_applications": [],
   "prefer_related_applications": false
 }
