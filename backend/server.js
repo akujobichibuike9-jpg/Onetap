@@ -2357,6 +2357,76 @@ app.post('/api/admin/users/:id/balance', adminAuth, async (req, res) => {
   }
 });
 
+// DELETE USER ACCOUNT (Admin)
+app.delete('/api/admin/users/:id', adminAuth, async (req, res) => {
+  try {
+    const { password, confirmEmail } = req.body;
+    const userId = req.params.id;
+    
+    // Verify admin password
+    if (password !== ADMIN_PASSWORD) {
+      return res.status(401).json({ error: 'Invalid admin password' });
+    }
+    
+    // Get user to verify and log
+    const user = await pool.query('SELECT * FROM users WHERE id=$1', [userId]);
+    if (!user.rows[0]) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    const userEmail = user.rows[0].email;
+    const userName = `${user.rows[0].first_name} ${user.rows[0].last_name}`;
+    const userBalance = user.rows[0].balance;
+    
+    // Verify email matches for extra security
+    if (confirmEmail !== userEmail) {
+      return res.status(400).json({ error: 'Email confirmation does not match' });
+    }
+    
+    console.log(`⚠️ ADMIN: Deleting user account...`);
+    console.log(`   User: ${userName} (${userEmail})`);
+    console.log(`   ID: ${userId}`);
+    console.log(`   Balance: ₦${userBalance}`);
+    
+    // Delete related records first (foreign key constraints)
+    // Delete transactions
+    const txResult = await pool.query('DELETE FROM transactions WHERE user_id=$1', [userId]);
+    console.log(`   Deleted ${txResult.rowCount} transactions`);
+    
+    // Delete activity logs
+    const logResult = await pool.query('DELETE FROM activity_logs WHERE user_id=$1', [userId]);
+    console.log(`   Deleted ${logResult.rowCount} activity logs`);
+    
+    // Delete KYC records if exists
+    try {
+      const kycResult = await pool.query('DELETE FROM kyc_verifications WHERE user_id=$1', [userId]);
+      console.log(`   Deleted ${kycResult.rowCount} KYC records`);
+    } catch (e) {
+      // KYC table might not exist, ignore
+    }
+    
+    // Finally delete the user
+    await pool.query('DELETE FROM users WHERE id=$1', [userId]);
+    
+    console.log(`🗑️ ADMIN: User account deleted permanently: ${userEmail}`);
+    
+    res.json({ 
+      success: true, 
+      message: `User account "${userName}" (${userEmail}) has been permanently deleted`,
+      deleted: {
+        user: userName,
+        email: userEmail,
+        balance: userBalance,
+        transactions: txResult.rowCount,
+        logs: logResult.rowCount
+      }
+    });
+  } catch (e) {
+    console.error('Delete user error:', e);
+    res.status(500).json({ error: 'Failed to delete user account' });
+  }
+});
+
 app.get('/api/admin/transactions', adminAuth, async (_, res) => {
   try {
     const r = await pool.query('SELECT t.*, u.email, u.first_name, u.last_name FROM transactions t LEFT JOIN users u ON t.user_id=u.id ORDER BY t.created_at DESC LIMIT 100');
