@@ -275,7 +275,7 @@ async function debitWallet(userId, amount, category, desc, meta = {}, profit = 0
 }
 
 // ===========================================
-// MONNIFY VIRTUAL ACCOUNT FUNCTIONS
+// MONNIFY VIRTUAL ACCOUNT FUNCTIONS - UPDATED WITH BVN SUPPORT
 // ===========================================
 let monnifyAccessToken = null;
 let monnifyTokenExpiry = 0;
@@ -318,24 +318,38 @@ async function getMonnifyToken() {
   }
 }
 
-async function createMonnifyVirtualAccount(user) {
+// UPDATED: Now accepts BVN or NIN for live mode
+async function createMonnifyVirtualAccount(user, bvn = null, nin = null) {
   const token = await getMonnifyToken();
   const accountRef = `ONETAP-${user.id}-${Date.now()}`;
   const accountName = `${user.first_name} ${user.last_name}`.toUpperCase();
   
   try {
+    const requestBody = {
+      accountReference: accountRef,
+      accountName: accountName,
+      currencyCode: 'NGN',
+      contractCode: MONNIFY_CONTRACT_CODE,
+      customerEmail: user.email,
+      customerName: accountName,
+      getAllAvailableBanks: false,
+      preferredBanks: ['035'] // Wema Bank
+    };
+    
+    // Add BVN or NIN for live environment (required by Monnify Live)
+    if (bvn) {
+      requestBody.bvn = bvn;
+    }
+    if (nin) {
+      requestBody.nin = nin;
+    }
+    
+    console.log(`🏦 Creating Monnify account with BVN: ${bvn ? 'Yes' : 'No'}, NIN: ${nin ? 'Yes' : 'No'}`);
+    console.log(`🏦 Request:`, JSON.stringify({ ...requestBody, bvn: bvn ? '***HIDDEN***' : null, nin: nin ? '***HIDDEN***' : null }));
+    
     const response = await axios.post(
       `${MONNIFY_BASE_URL}/api/v2/bank-transfer/reserved-accounts`,
-      {
-        accountReference: accountRef,
-        accountName: accountName,
-        currencyCode: 'NGN',
-        contractCode: MONNIFY_CONTRACT_CODE,
-        customerEmail: user.email,
-        customerName: accountName,
-        getAllAvailableBanks: false,
-        preferredBanks: ['035'] // Wema Bank
-      },
+      requestBody,
       {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -343,6 +357,8 @@ async function createMonnifyVirtualAccount(user) {
         }
       }
     );
+    
+    console.log(`🏦 Monnify Response:`, JSON.stringify(response.data).substring(0, 300));
     
     if (response.data.requestSuccessful) {
       const account = response.data.responseBody.accounts[0];
@@ -926,11 +942,11 @@ app.post('/api/wallet/fund/test', auth, async (req, res) => {
 });
 
 // ===========================================
-// MONNIFY VIRTUAL ACCOUNT ROUTES
+// MONNIFY VIRTUAL ACCOUNT ROUTES - UPDATED WITH BVN
 // ===========================================
 
-// Get or Create Virtual Account
-app.get('/api/wallet/virtual-account', auth, checkMaintenance, checkPayments, async (req, res) => {
+// GET - Check if user has virtual account (returns requiresBvn flag for live mode)
+app.get('/api/wallet/virtual-account', auth, async (req, res) => {
   try {
     const user = req.user;
     
@@ -954,9 +970,76 @@ app.get('/api/wallet/virtual-account', auth, checkMaintenance, checkPayments, as
       });
     }
     
-    // Create new virtual account
-    console.log(`🏦 Creating virtual account for user ${user.id} (${user.email})`);
-    const account = await createMonnifyVirtualAccount(user);
+    // Check if live mode (requires BVN)
+    const isLiveMode = MONNIFY_BASE_URL.includes('api.monnify.com');
+    
+    res.json({
+      success: false,
+      hasAccount: false,
+      requiresBvn: isLiveMode
+    });
+  } catch (e) {
+    console.error('Virtual account check error:', e.message);
+    res.status(500).json({ success: false, error: 'Failed to check account status' });
+  }
+});
+
+// POST - Create virtual account with BVN or NIN (for live mode)
+app.post('/api/wallet/virtual-account', auth, checkMaintenance, checkPayments, async (req, res) => {
+  try {
+    const user = req.user;
+    const { bvn, nin } = req.body;
+    
+    // Check if user already has a virtual account
+    if (user.virtual_account_number) {
+      return res.json({
+        success: true,
+        hasAccount: true,
+        accountNumber: user.virtual_account_number,
+        bankName: user.virtual_account_bank,
+        accountName: user.virtual_account_name
+      });
+    }
+    
+    // Check if Monnify is configured
+    if (!MONNIFY_API_KEY || !MONNIFY_SECRET_KEY || !MONNIFY_CONTRACT_CODE) {
+      return res.json({
+        success: false,
+        hasAccount: false,
+        error: 'Virtual account service not configured'
+      });
+    }
+    
+    // Check if BVN or NIN is required (live mode)
+    const isLiveMode = MONNIFY_BASE_URL.includes('api.monnify.com');
+    if (isLiveMode && !bvn && !nin) {
+      return res.json({
+        success: false,
+        hasAccount: false,
+        requiresBvn: true,
+        error: 'BVN or NIN is required to create your account'
+      });
+    }
+    
+    // Validate BVN format (11 digits)
+    if (bvn && !/^\d{11}$/.test(bvn)) {
+      return res.status(400).json({
+        success: false,
+        error: 'BVN must be 11 digits'
+      });
+    }
+    
+    // Validate NIN format (11 digits)
+    if (nin && !/^\d{11}$/.test(nin)) {
+      return res.status(400).json({
+        success: false,
+        error: 'NIN must be 11 digits'
+      });
+    }
+    
+    // Create new virtual account with BVN or NIN
+    console.log(`🏦 Creating virtual account for user ${user.id} (${user.email}) with ${bvn ? 'BVN' : 'NIN'}`);
+    const account = await createMonnifyVirtualAccount(user, bvn, nin);
     
     // Save to database
     await pool.query(
@@ -971,6 +1054,8 @@ app.get('/api/wallet/virtual-account', auth, checkMaintenance, checkPayments, as
     
     console.log(`🏦 Virtual account created: ${account.accountNumber} (${account.bankName})`);
     
+    await logActivity(user.id, 'virtual_account_created', req, { bank: account.bankName });
+    
     res.json({
       success: true,
       hasAccount: true,
@@ -979,10 +1064,10 @@ app.get('/api/wallet/virtual-account', auth, checkMaintenance, checkPayments, as
       accountName: account.accountName
     });
   } catch (e) {
-    console.error('Virtual account error:', e.message);
+    console.error('Virtual account error:', e.response?.data || e.message);
     res.status(500).json({
       success: false,
-      error: 'Failed to get virtual account. Please try again.'
+      error: e.response?.data?.responseMessage || 'Failed to create virtual account. Please verify your BVN/NIN and try again.'
     });
   }
 });
@@ -2493,6 +2578,7 @@ console.log(`   OpenAI:   ${OPENAI_API_KEY ? '✅' : '⚠️'}`);
 console.log(`   KYC API:  ${KYC_API_KEY ? '✅' : '⚠️'}`);
 console.log(`   VTU API:  ${process.env.VTU_API_KEY ? '✅' : '⚠️'}`);
 console.log(`   Monnify:  ${MONNIFY_API_KEY && MONNIFY_CONTRACT_CODE ? '✅' : '⚠️'}`);
+console.log(`   Monnify Mode: ${MONNIFY_BASE_URL.includes('api.monnify.com') ? '🟢 LIVE' : '🟡 SANDBOX'}`);
 console.log(`   Email:    ${RESEND_API_KEY ? '✅' : '⚠️'}`);
 
 initDB().then(() => {
