@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { C, formatNaira, useUser } from '../App';
-import { ArrowLeft, Wifi, Check, AlertCircle, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Wifi, Check, AlertCircle, ChevronDown, ChevronRight } from 'lucide-react';
 
 export default function Data() {
   const navigate = useNavigate();
@@ -16,6 +16,7 @@ export default function Data() {
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState('');
   const [showPlans, setShowPlans] = useState(false);
+  const [expandedTypes, setExpandedTypes] = useState({});
 
   useEffect(() => { api.get('/vtu/networks').then(r => setNetworks(r.data.networks)); }, []);
   
@@ -24,9 +25,30 @@ export default function Data() {
       api.get(`/vtu/data-plans/${network.id}`).then(r => {
         setPlans(r.data.plans);
         setPlan(null);
+        setExpandedTypes({});
       });
     }
   }, [network]);
+
+  // Group plans by type
+  const groupedPlans = plans.reduce((acc, p) => {
+    const type = p.type || 'Other';
+    if (!acc[type]) acc[type] = [];
+    acc[type].push(p);
+    return acc;
+  }, {});
+
+  // Sort types in preferred order
+  const typeOrder = ['SME', 'SME2', 'Corporate Gifting', 'Data Coupons', 'Gifting', 'Gifting (Awoof)', 'Awoof Data', 'Other'];
+  const sortedTypes = Object.keys(groupedPlans).sort((a, b) => {
+    const aIdx = typeOrder.indexOf(a);
+    const bIdx = typeOrder.indexOf(b);
+    return (aIdx === -1 ? 999 : aIdx) - (bIdx === -1 ? 999 : bIdx);
+  });
+
+  const toggleType = (type) => {
+    setExpandedTypes(prev => ({ ...prev, [type]: !prev[type] }));
+  };
 
   const buy = async () => {
     if (!network || phone.length !== 11 || !plan) {
@@ -42,6 +64,20 @@ export default function Data() {
       await refreshUser();
     } catch (e) { setError(e.response?.data?.error || 'Purchase failed'); }
     setLoading(false);
+  };
+
+  // Type badge colors
+  const getTypeColor = (type) => {
+    const colors = {
+      'SME': '#10B981',
+      'SME2': '#059669',
+      'Corporate Gifting': '#8B5CF6',
+      'Data Coupons': '#F59E0B',
+      'Gifting': '#EC4899',
+      'Gifting (Awoof)': '#EF4444',
+      'Awoof Data': '#EF4444',
+    };
+    return colors[type] || '#6B7280';
   };
 
   if (success) {
@@ -103,24 +139,94 @@ export default function Data() {
             {/* Dropdown Trigger */}
             <button onClick={() => setShowPlans(!showPlans)} style={{ width: '100%', padding: 18, borderRadius: 14, background: C.bgCard, border: `1px solid ${plan ? C.primary : C.border}`, color: plan ? C.text : C.textMuted, fontSize: 15, cursor: 'pointer', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               {plan ? (
-                <span>{plan.name} - {formatNaira(plan.price)} <span style={{ color: C.textMuted, fontSize: 12 }}>({plan.validity})</span></span>
+                <div>
+                  <span style={{ fontWeight: 600 }}>{plan.size}</span>
+                  <span style={{ color: C.textMuted, fontSize: 13, marginLeft: 8 }}>({plan.validity})</span>
+                  <span style={{ color: C.primary, fontWeight: 700, marginLeft: 12 }}>{formatNaira(plan.price)}</span>
+                </div>
               ) : (
                 <span>Choose a plan</span>
               )}
               <ChevronDown size={20} style={{ transform: showPlans ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
             </button>
 
-            {/* Plan List */}
+            {/* Plan List - Grouped by Type */}
             {showPlans && (
-              <div style={{ maxHeight: 320, overflowY: 'auto', background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, marginBottom: 20 }}>
-                {plans.map(p => (
-                  <button key={p.id} onClick={() => { setPlan(p); setShowPlans(false); }} style={{ width: '100%', padding: 16, background: plan?.id === p.id ? 'rgba(139,92,246,0.1)' : 'transparent', borderBottom: `1px solid ${C.borderLight}`, cursor: 'pointer', textAlign: 'left', border: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <p style={{ fontWeight: 600, fontSize: 14, color: C.text, marginBottom: 4 }}>{p.name}</p>
-                      <p style={{ color: C.textMuted, fontSize: 12 }}>{p.type} • {p.validity}</p>
-                    </div>
-                    <span style={{ fontWeight: 700, fontSize: 15, color: C.primary }}>{formatNaira(p.price)}</span>
-                  </button>
+              <div style={{ maxHeight: 400, overflowY: 'auto', background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, marginBottom: 20 }}>
+                {sortedTypes.map(type => (
+                  <div key={type}>
+                    {/* Type Header - Collapsible */}
+                    <button 
+                      onClick={() => toggleType(type)} 
+                      style={{ 
+                        width: '100%', 
+                        padding: '14px 16px', 
+                        background: 'rgba(139,92,246,0.05)', 
+                        borderBottom: `1px solid ${C.borderLight}`, 
+                        cursor: 'pointer', 
+                        textAlign: 'left', 
+                        border: 'none', 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        position: 'sticky',
+                        top: 0,
+                        zIndex: 1
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ 
+                          background: getTypeColor(type), 
+                          color: '#fff', 
+                          padding: '4px 10px', 
+                          borderRadius: 6, 
+                          fontSize: 11, 
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
+                        }}>
+                          {type}
+                        </span>
+                        <span style={{ color: C.textMuted, fontSize: 12 }}>
+                          {groupedPlans[type].length} plans
+                        </span>
+                      </div>
+                      <ChevronRight 
+                        size={18} 
+                        color={C.textMuted}
+                        style={{ 
+                          transform: expandedTypes[type] ? 'rotate(90deg)' : 'none', 
+                          transition: 'transform 0.2s' 
+                        }} 
+                      />
+                    </button>
+
+                    {/* Plans under this type */}
+                    {expandedTypes[type] && groupedPlans[type].map(p => (
+                      <button 
+                        key={p.id} 
+                        onClick={() => { setPlan(p); setShowPlans(false); }} 
+                        style={{ 
+                          width: '100%', 
+                          padding: '14px 16px 14px 28px', 
+                          background: plan?.id === p.id ? 'rgba(139,92,246,0.1)' : 'transparent', 
+                          borderBottom: `1px solid ${C.borderLight}`, 
+                          cursor: 'pointer', 
+                          textAlign: 'left', 
+                          border: 'none', 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'center' 
+                        }}
+                      >
+                        <div>
+                          <p style={{ fontWeight: 600, fontSize: 14, color: C.text, marginBottom: 2 }}>{p.size}</p>
+                          <p style={{ color: C.textMuted, fontSize: 11 }}>{p.validity}</p>
+                        </div>
+                        <span style={{ fontWeight: 700, fontSize: 15, color: C.primary }}>{formatNaira(p.price)}</span>
+                      </button>
+                    ))}
+                  </div>
                 ))}
               </div>
             )}
@@ -132,12 +238,28 @@ export default function Data() {
           <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, padding: 18, marginBottom: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
               <span style={{ color: C.textMuted, fontSize: 13 }}>Data Plan</span>
-              <span style={{ color: C.text, fontSize: 13 }}>{plan.name}</span>
+              <span style={{ color: C.text, fontSize: 13 }}>{plan.size}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+              <span style={{ color: C.textMuted, fontSize: 13 }}>Type</span>
+              <span style={{ 
+                background: getTypeColor(plan.type), 
+                color: '#fff', 
+                padding: '2px 8px', 
+                borderRadius: 4, 
+                fontSize: 11, 
+                fontWeight: 600 
+              }}>{plan.type}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
               <span style={{ color: C.textMuted, fontSize: 13 }}>Validity</span>
               <span style={{ color: C.textSec, fontSize: 13 }}>{plan.validity}</span>
             </div>
+            {plan.note && (
+              <div style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 8, padding: 10, marginBottom: 10 }}>
+                <span style={{ color: '#F59E0B', fontSize: 12 }}>⚠️ {plan.note}</span>
+              </div>
+            )}
             <div style={{ borderTop: `1px solid ${C.borderLight}`, paddingTop: 12, display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: C.text, fontSize: 14, fontWeight: 600 }}>Total</span>
               <span style={{ color: C.primary, fontSize: 16, fontWeight: 700 }}>{formatNaira(plan.price)}</span>

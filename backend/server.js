@@ -1166,55 +1166,95 @@ const NETWORKS = [
   { id: 4, name: 'Airtel', code: 'airtel', color: '#FF0000' }
 ];
 
-// DancityNG Data Plans with their actual plan IDs
+// ===========================================
+// DATA PLANS - 57 Plans Total (Updated per handover document)
+// ===========================================
 const DATA_PLANS = {
-  1: [ // MTN - More options!
-    { id: 'mtn-500mb', planId: 261, name: '750MB', size: '750MB', price: 250, validity: '7 Days', type: 'Data Coupon' },
-    { id: 'mtn-1gb-cg', planId: 208, name: '1GB', size: '1GB', price: 300, validity: '30 Days', type: 'Corporate Gifting' },
-    { id: 'mtn-1gb-day', planId: 251, name: '1GB (1 Day)', size: '1GB', price: 550, validity: '1 Day', type: 'Gifting' },
-    { id: 'mtn-1.5gb', planId: 272, name: '1.5GB', size: '1.5GB', price: 450, validity: '30 Days', type: 'Data Coupon' },
-    { id: 'mtn-2gb-cg', planId: 209, name: '2GB', size: '2GB', price: 600, validity: '30 Days', type: 'Corporate Gifting' },
-    { id: 'mtn-2gb-dc', planId: 263, name: '2GB', size: '2GB', price: 560, validity: '30 Days', type: 'Data Coupon' },
-    { id: 'mtn-2gb-sme', planId: 8, name: '2GB SME', size: '2GB', price: 1500, validity: '30 Days', type: 'SME' },
-    { id: 'mtn-3gb-dc', planId: 271, name: '3GB', size: '3GB', price: 750, validity: '30 Days', type: 'Data Coupon' },
-    { id: 'mtn-3gb-sme', planId: 44, name: '3GB SME', size: '3GB', price: 2200, validity: '30 Days', type: 'SME' },
-    { id: 'mtn-3.2gb', planId: 281, name: '3.2GB (2 Days)', size: '3.2GB', price: 1100, validity: '2 Days', type: 'Gifting' },
-    { id: 'mtn-4.5gb', planId: 273, name: '4.5GB', size: '4.5GB', price: 1200, validity: '30 Days', type: 'Data Coupon' },
-    { id: 'mtn-5gb-sme', planId: 213, name: '5GB SME', size: '5GB', price: 2600, validity: '30 Days', type: 'SME' },
-    { id: 'mtn-6gb', planId: 282, name: '6GB (7 Days)', size: '6GB', price: 2700, validity: '7 Days', type: 'Gifting' },
-    { id: 'mtn-11gb', planId: 284, name: '11GB (7 Days)', size: '11GB', price: 3700, validity: '7 Days', type: 'Awoof Data' },
+  1: [ // MTN - 31 Plans
+    // SME Plans
+    { id: 'mtn-sme-1gb', planId: 307, name: '1GB SME', size: '1GB', price: 650, validity: '30 Days', type: 'SME' },
+    { id: 'mtn-sme-2gb', planId: 8, name: '2GB SME', size: '2GB', price: 1400, validity: '30 Days', type: 'SME' },
+    { id: 'mtn-sme-3gb', planId: 44, name: '3GB SME', size: '3GB', price: 2100, validity: '30 Days', type: 'SME' },
+    { id: 'mtn-sme-5gb', planId: 213, name: '5GB SME', size: '5GB', price: 2500, validity: '30 Days', type: 'SME' },
+    
+    // SME2 Plans
+    { id: 'mtn-sme2-1gb', planId: 306, name: '1GB SME2', size: '1GB', price: 650, validity: '30 Days', type: 'SME2' },
+    { id: 'mtn-sme2-2gb', planId: 267, name: '2GB SME2', size: '2GB', price: 1200, validity: '30 Days', type: 'SME2' },
+    { id: 'mtn-sme2-3gb', planId: 268, name: '3GB SME2', size: '3GB', price: 1600, validity: '30 Days', type: 'SME2' },
+    { id: 'mtn-sme2-5gb', planId: 269, name: '5GB SME2', size: '5GB', price: 2500, validity: '30 Days', type: 'SME2' },
+    
+    // Corporate Gifting Plans (Cheapest - Recommended)
+    { id: 'mtn-cg-1gb', planId: 208, name: '1GB CG', size: '1GB', price: 250, validity: '30 Days', type: 'Corporate Gifting' },
+    { id: 'mtn-cg-2gb', planId: 209, name: '2GB CG', size: '2GB', price: 550, validity: '30 Days', type: 'Corporate Gifting' },
+    
+    // Data Coupons Plans
+    { id: 'mtn-dc-750mb', planId: 261, name: '750MB DC', size: '750MB', price: 205, validity: '7 Days', type: 'Data Coupons' },
+    { id: 'mtn-dc-1gb', planId: 264, name: '1GB DC', size: '1GB', price: 255, validity: '7 Days', type: 'Data Coupons' },
+    { id: 'mtn-dc-1.5gb', planId: 272, name: '1.5GB DC', size: '1.5GB', price: 390, validity: '30 Days', type: 'Data Coupons' },
+    { id: 'mtn-dc-2gb', planId: 263, name: '2GB DC', size: '2GB', price: 510, validity: '30 Days', type: 'Data Coupons' },
+    { id: 'mtn-dc-3gb', planId: 271, name: '3GB DC', size: '3GB', price: 690, validity: '30 Days', type: 'Data Coupons' },
+    { id: 'mtn-dc-4.5gb', planId: 273, name: '4.5GB DC', size: '4.5GB', price: 1100, validity: '30 Days', type: 'Data Coupons' },
+    
+    // Gifting Plans
+    { id: 'mtn-gift-230mb', planId: 299, name: '230MB Gift', size: '230MB', price: 200, validity: '1 Day', type: 'Gifting' },
+    { id: 'mtn-gift-750mb', planId: 301, name: '750MB Gift', size: '750MB', price: 450, validity: '3 Days', type: 'Gifting' },
+    { id: 'mtn-gift-1gb-1d', planId: 251, name: '1GB Gift', size: '1GB', price: 500, validity: '1 Day', type: 'Gifting' },
+    { id: 'mtn-gift-1.5gb', planId: 305, name: '1.5GB Gift', size: '1.5GB', price: 600, validity: '2 Days', type: 'Gifting' },
+    { id: 'mtn-gift-1.2gb', planId: 296, name: '1.2GB Gift', size: '1.2GB', price: 750, validity: '7 Days', type: 'Gifting' },
+    { id: 'mtn-gift-2gb-2d', planId: 297, name: '2GB Gift', size: '2GB', price: 750, validity: '2 Days', type: 'Gifting' },
+    { id: 'mtn-gift-2.5gb-1d', planId: 300, name: '2.5GB Gift', size: '2.5GB', price: 750, validity: '1 Day', type: 'Gifting' },
+    { id: 'mtn-gift-2.5gb-2d', planId: 298, name: '2.5GB Gift', size: '2.5GB', price: 900, validity: '2 Days', type: 'Gifting' },
+    { id: 'mtn-gift-3.2gb', planId: 281, name: '3.2GB Gift', size: '3.2GB', price: 1000, validity: '2 Days', type: 'Gifting' },
+    { id: 'mtn-gift-2gb-30d', planId: 302, name: '2GB Gift', size: '2GB', price: 1500, validity: '30 Days', type: 'Gifting' },
+    { id: 'mtn-gift-1.8gb', planId: 303, name: '1.8GB Gift', size: '1.8GB', price: 1500, validity: '30 Days', type: 'Gifting' },
+    { id: 'mtn-gift-6gb', planId: 282, name: '6GB Gift', size: '6GB', price: 2500, validity: '7 Days', type: 'Gifting' },
+    { id: 'mtn-gift-11gb', planId: 295, name: '11GB Gift', size: '11GB', price: 3500, validity: '7 Days', type: 'Gifting' },
+    
+    // Awoof Data Plans
+    { id: 'mtn-awoof-1gb', planId: 290, name: '1GB Awoof', size: '1GB', price: 500, validity: '1 Day', type: 'Awoof Data' },
+    { id: 'mtn-awoof-3.2gb', planId: 292, name: '3.2GB Awoof', size: '3.2GB', price: 1000, validity: '2 Days', type: 'Awoof Data' },
+    { id: 'mtn-awoof-6gb', planId: 293, name: '6GB Awoof', size: '6GB', price: 2500, validity: '7 Days', type: 'Awoof Data' },
+    { id: 'mtn-awoof-11gb', planId: 284, name: '11GB Awoof', size: '11GB', price: 3500, validity: '7 Days', type: 'Awoof Data' },
   ],
-  2: [ // GLO - More options!
-    { id: 'glo-200mb', planId: 243, name: '200MB', size: '200MB', price: 100, validity: '30 Days', type: 'Corporate Gifting' },
-    { id: 'glo-500mb', planId: 244, name: '500MB', size: '500MB', price: 250, validity: '30 Days', type: 'Corporate Gifting' },
-    { id: 'glo-750mb', planId: 286, name: '750MB (1 Day)', size: '750MB', price: 220, validity: '1 Day', type: 'Awoof' },
-    { id: 'glo-1gb', planId: 245, name: '1GB', size: '1GB', price: 480, validity: '30 Days', type: 'Corporate Gifting' },
-    { id: 'glo-1.5gb', planId: 287, name: '1.5GB (1 Day)', size: '1.5GB', price: 330, validity: '1 Day', type: 'Awoof' },
-    { id: 'glo-2gb', planId: 246, name: '2GB', size: '2GB', price: 950, validity: '30 Days', type: 'Corporate Gifting' },
-    { id: 'glo-2.5gb', planId: 288, name: '2.5GB (2 Days)', size: '2.5GB', price: 550, validity: '2 Days', type: 'Awoof' },
-    { id: 'glo-3gb', planId: 247, name: '3GB', size: '3GB', price: 1400, validity: '30 Days', type: 'Corporate Gifting' },
-    { id: 'glo-5gb', planId: 248, name: '5GB', size: '5GB', price: 2350, validity: '30 Days', type: 'Corporate Gifting' },
-    { id: 'glo-10gb', planId: 249, name: '10GB', size: '10GB', price: 4700, validity: '30 Days', type: 'Corporate Gifting' },
-    { id: 'glo-10gb-awoof', planId: 289, name: '10GB (7 Days)', size: '10GB', price: 2100, validity: '7 Days', type: 'Awoof' },
+  
+  2: [ // GLO - 11 Plans
+    // Corporate Gifting Plans
+    { id: 'glo-cg-200mb', planId: 243, name: '200MB CG', size: '200MB', price: 88, validity: '30 Days', type: 'Corporate Gifting' },
+    { id: 'glo-cg-500mb', planId: 244, name: '500MB CG', size: '500MB', price: 220, validity: '30 Days', type: 'Corporate Gifting' },
+    { id: 'glo-cg-1gb', planId: 245, name: '1GB CG', size: '1GB', price: 440, validity: '30 Days', type: 'Corporate Gifting' },
+    { id: 'glo-cg-2gb', planId: 246, name: '2GB CG', size: '2GB', price: 880, validity: '30 Days', type: 'Corporate Gifting' },
+    { id: 'glo-cg-3gb', planId: 247, name: '3GB CG', size: '3GB', price: 1320, validity: '30 Days', type: 'Corporate Gifting' },
+    { id: 'glo-cg-5gb', planId: 248, name: '5GB CG', size: '5GB', price: 2200, validity: '30 Days', type: 'Corporate Gifting' },
+    { id: 'glo-cg-10gb', planId: 249, name: '10GB CG', size: '10GB', price: 4400, validity: '30 Days', type: 'Corporate Gifting' },
+    
+    // Gifting (Awoof) Plans
+    { id: 'glo-awoof-750mb', planId: 286, name: '750MB Awoof', size: '750MB', price: 200, validity: '1 Day', type: 'Gifting (Awoof)' },
+    { id: 'glo-awoof-1.5gb', planId: 287, name: '1.5GB Awoof', size: '1.5GB', price: 300, validity: '1 Day', type: 'Gifting (Awoof)' },
+    { id: 'glo-awoof-2.5gb', planId: 288, name: '2.5GB Awoof', size: '2.5GB', price: 500, validity: '2 Days', type: 'Gifting (Awoof)' },
+    { id: 'glo-awoof-10gb', planId: 289, name: '10GB Awoof', size: '10GB', price: 2000, validity: '7 Days', type: 'Gifting (Awoof)' },
   ],
-  3: [ // 9mobile - More options!
-    { id: '9mobile-500mb', planId: 231, name: '500MB', size: '500MB', price: 280, validity: '30 Days', type: 'SME' },
-    { id: '9mobile-1gb', planId: 234, name: '1GB', size: '1GB', price: 550, validity: '30 Days', type: 'SME' },
-    { id: '9mobile-2gb', planId: 232, name: '2GB', size: '2GB', price: 1100, validity: '30 Days', type: 'SME' },
-    { id: '9mobile-3gb', planId: 185, name: '3GB', size: '3GB', price: 1600, validity: '30 Days', type: 'SME' },
-    { id: '9mobile-5gb', planId: 230, name: '5GB', size: '5GB', price: 2650, validity: '30 Days', type: 'SME' },
-    { id: '9mobile-11gb', planId: 260, name: '11GB', size: '11GB', price: 5800, validity: '30 Days', type: 'SME' },
+  
+  3: [ // 9MOBILE - 6 Plans
+    // SME Plans
+    { id: '9mobile-sme-500mb', planId: 231, name: '500MB SME', size: '500MB', price: 250, validity: '30 Days', type: 'SME' },
+    { id: '9mobile-sme-1gb', planId: 234, name: '1GB SME', size: '1GB', price: 500, validity: '30 Days', type: 'SME' },
+    { id: '9mobile-sme-2gb', planId: 232, name: '2GB SME', size: '2GB', price: 1000, validity: '30 Days', type: 'SME' },
+    { id: '9mobile-sme-3gb', planId: 185, name: '3GB SME', size: '3GB', price: 1500, validity: '30 Days', type: 'SME' },
+    { id: '9mobile-sme-5gb', planId: 230, name: '5GB SME', size: '5GB', price: 2500, validity: '30 Days', type: 'SME' },
+    { id: '9mobile-sme-11gb', planId: 260, name: '11GB SME', size: '11GB', price: 5500, validity: '30 Days', type: 'SME' },
   ],
-  4: [ // Airtel - More options!
-    { id: 'airtel-150mb', planId: 218, name: '150MB', size: '150MB', price: 80, validity: '1 Day', type: 'Corporate Gifting' },
-    { id: 'airtel-300mb', planId: 219, name: '300MB', size: '300MB', price: 150, validity: '2 Days', type: 'Corporate Gifting' },
-    { id: 'airtel-600mb', planId: 215, name: '600MB', size: '600MB', price: 280, validity: '2 Days', type: 'Corporate Gifting' },
-    { id: 'airtel-1gb', planId: 214, name: '1GB', size: '1GB', price: 400, validity: '2 Days', type: 'Corporate Gifting' },
-    { id: 'airtel-1gb-week', planId: 216, name: '1GB (Weekly)', size: '1GB', price: 900, validity: '7 Days', type: 'Corporate Gifting' },
-    { id: 'airtel-3.5gb', planId: 217, name: '3.5GB', size: '3.5GB', price: 1600, validity: '7 Days', type: 'Corporate Gifting' },
-    { id: 'airtel-4gb', planId: 242, name: '4GB', size: '4GB', price: 2650, validity: '30 Days', type: 'Corporate Gifting' },
-    { id: 'airtel-10gb', planId: 237, name: '10GB', size: '10GB', price: 3500, validity: '30 Days', type: 'Corporate Gifting' },
-    { id: 'airtel-20gb', planId: 241, name: '20GB', size: '20GB', price: 19000, validity: '30 Days', type: 'Corporate Gifting' },
+  
+  4: [ // AIRTEL - 9 Plans (with warning notes)
+    // Corporate Gifting Plans
+    { id: 'airtel-cg-150mb', planId: 218, name: '150MB CG', size: '150MB', price: 70, validity: '1 Day', type: 'Corporate Gifting', note: "Don't buy if owing" },
+    { id: 'airtel-cg-300mb', planId: 219, name: '300MB CG', size: '300MB', price: 130, validity: '2 Days', type: 'Corporate Gifting', note: "Don't buy if owing" },
+    { id: 'airtel-cg-600mb', planId: 215, name: '600MB CG', size: '600MB', price: 250, validity: '2 Days', type: 'Corporate Gifting', note: "Don't buy if owing" },
+    { id: 'airtel-cg-1gb-social', planId: 214, name: '1GB Social', size: '1GB', price: 370, validity: '2 Days', type: 'Corporate Gifting', note: 'Social Bundle' },
+    { id: 'airtel-cg-1gb-weekly', planId: 216, name: '1GB Weekly', size: '1GB', price: 800, validity: '7 Days', type: 'Corporate Gifting', note: "Don't buy if owing" },
+    { id: 'airtel-cg-3.5gb', planId: 217, name: '3.5GB CG', size: '3.5GB', price: 1500, validity: '7 Days', type: 'Corporate Gifting', note: "Don't buy if owing" },
+    { id: 'airtel-cg-4gb', planId: 242, name: '4GB CG', size: '4GB', price: 2500, validity: '30 Days', type: 'Corporate Gifting' },
+    { id: 'airtel-cg-10gb', planId: 237, name: '10GB CG', size: '10GB', price: 3300, validity: '30 Days', type: 'Corporate Gifting', note: "Don't buy if owing" },
+    { id: 'airtel-cg-20gb', planId: 241, name: '20GB CG', size: '20GB', price: 18000, validity: '30 Days', type: 'Corporate Gifting' },
   ]
 };
 
@@ -1901,8 +1941,8 @@ USER INFO:
 
 YOUR PERSONALITY:
 - Warm, friendly, and helpful Nigerian assistant
-- Use casual Nigerian English (e.g., "How far!", "No wahala", "Sharp sharp", "Omo", "E go be", "No wam', "No p", )
-- Keep responses concise but helpful (5-7sentences usually)
+- Use casual Nigerian English (e.g., "How far!", "No wahala", "Sharp sharp", "Omo", "E go be", "No wam', "No p")
+- Keep responses concise but helpful (5-7 sentences usually)
 - Be empathetic when users have issues
 - Never be robotic - be natural and conversational!
 
@@ -1912,7 +1952,7 @@ WHAT ONETAP OFFERS:
 3. **Electricity** - Pay electricity bills (IKEDC, EKEDC, AEDC, etc.)
 4. **Cable TV** - Subscribe to GOtv, DStv, Startimes
 5. **KYC Verification** - Verify NIN, BVN (₦150-₦250)
-6. **Wallet** - Fund via bank transfer (Paystack)
+6. **Wallet** - Fund via bank transfer (Monnify)
 
 COMMON QUESTIONS & ANSWERS:
 
@@ -1943,13 +1983,30 @@ WHAT YOU CANNOT DO (guide user to the app pages instead):
 - Electricity payments (need Meter number + disco - guide them to Electricity page)
 - KYC verifications (need specific ID numbers - guide them to KYC page)
 
-PRICING (Approximate):
-- Airtime: Face value + small service fee
-- MTN Data: 500MB=₦250, 1GB=₦300, 2GB=₦600, 5GB=₦2600
-- GLO Data: 500MB=₦250, 1GB=₦480, 2GB=₦950, 5GB=₦2350
-- Airtel Data: 300MB=₦150, 1GB=₦400, 3.5GB=₦1600
-- 9mobile Data: 500MB=₦280, 1GB=₦550, 2GB=₦1100
-- KYC: NIN=₦200, BVN=₦150
+PRICING (Approximate - prices include admin markup):
+
+MTN Data (Corporate Gifting - Cheapest!):
+- 1GB = ₦250, 2GB = ₦550
+
+MTN Data Coupons:
+- 750MB = ₦205 (7 days), 1GB = ₦255 (7 days), 1.5GB = ₦390, 2GB = ₦510, 3GB = ₦690
+
+MTN SME:
+- 1GB = ₦650, 2GB = ₦1400, 3GB = ₦2100, 5GB = ₦2500
+
+GLO Data (Corporate Gifting):
+- 200MB = ₦88, 500MB = ₦220, 1GB = ₦440, 2GB = ₦880, 5GB = ₦2200
+
+GLO Awoof:
+- 750MB = ₦200 (1 day), 1.5GB = ₦300 (1 day), 2.5GB = ₦500 (2 days), 10GB = ₦2000 (7 days)
+
+9mobile Data (SME):
+- 500MB = ₦250, 1GB = ₦500, 2GB = ₦1000, 3GB = ₦1500, 5GB = ₦2500
+
+Airtel Data (Corporate Gifting):
+- 150MB = ₦70, 300MB = ₦130, 600MB = ₦250, 1GB = ₦370-800, 3.5GB = ₦1500
+
+KYC: NIN = ₦200, BVN = ₦150
 
 TRANSACTION EXECUTION:
 When user wants to buy airtime or data and gives you: network + phone number + amount/data size, execute immediately!
@@ -1958,13 +2015,45 @@ NETWORKS: MTN(id:1), GLO(id:2), 9mobile(id:3), Airtel(id:4)
 
 To execute, add this at END of your response:
 - Airtime: ###ACTION###{"type":"airtime","network":1,"phone":"08012345678","amount":500}###
-- Data: ###ACTION###{"type":"data","network":1,"phone":"08012345678","planId":"mtn-1gb-cg"}###
+- Data: ###ACTION###{"type":"data","network":1,"phone":"08012345678","planId":"mtn-cg-1gb"}###
 
-PLAN IDs:
-- MTN: mtn-500mb, mtn-1gb-cg, mtn-2gb-cg, mtn-3gb-dc, mtn-5gb-sme
-- GLO: glo-200mb, glo-500mb, glo-1gb, glo-2gb, glo-5gb
-- 9mobile: 9mobile-500mb, 9mobile-1gb, 9mobile-2gb, 9mobile-3gb
-- Airtel: airtel-300mb, airtel-1gb, airtel-3.5gb, airtel-10gb
+PLAN IDs (use these for data transactions):
+
+MTN Corporate Gifting (Cheapest - Recommend these!):
+- mtn-cg-1gb (₦250), mtn-cg-2gb (₦550)
+
+MTN Data Coupons:
+- mtn-dc-750mb (₦205), mtn-dc-1gb (₦255), mtn-dc-1.5gb (₦390), mtn-dc-2gb (₦510), mtn-dc-3gb (₦690), mtn-dc-4.5gb (₦1100)
+
+MTN SME:
+- mtn-sme-1gb (₦650), mtn-sme-2gb (₦1400), mtn-sme-3gb (₦2100), mtn-sme-5gb (₦2500)
+
+MTN SME2:
+- mtn-sme2-1gb (₦650), mtn-sme2-2gb (₦1200), mtn-sme2-3gb (₦1600), mtn-sme2-5gb (₦2500)
+
+MTN Gifting:
+- mtn-gift-230mb, mtn-gift-750mb, mtn-gift-1gb-1d, mtn-gift-1.5gb, mtn-gift-1.2gb, mtn-gift-2gb-2d, mtn-gift-2.5gb-1d, mtn-gift-2.5gb-2d, mtn-gift-3.2gb, mtn-gift-2gb-30d, mtn-gift-1.8gb, mtn-gift-6gb, mtn-gift-11gb
+
+MTN Awoof:
+- mtn-awoof-1gb (₦500), mtn-awoof-3.2gb (₦1000), mtn-awoof-6gb (₦2500), mtn-awoof-11gb (₦3500)
+
+GLO Corporate Gifting:
+- glo-cg-200mb (₦88), glo-cg-500mb (₦220), glo-cg-1gb (₦440), glo-cg-2gb (₦880), glo-cg-3gb (₦1320), glo-cg-5gb (₦2200), glo-cg-10gb (₦4400)
+
+GLO Awoof:
+- glo-awoof-750mb (₦200), glo-awoof-1.5gb (₦300), glo-awoof-2.5gb (₦500), glo-awoof-10gb (₦2000)
+
+9MOBILE SME:
+- 9mobile-sme-500mb (₦250), 9mobile-sme-1gb (₦500), 9mobile-sme-2gb (₦1000), 9mobile-sme-3gb (₦1500), 9mobile-sme-5gb (₦2500), 9mobile-sme-11gb (₦5500)
+
+AIRTEL Corporate Gifting (⚠️ Some plans: Don't buy if customer is owing):
+- airtel-cg-150mb (₦70), airtel-cg-300mb (₦130), airtel-cg-600mb (₦250), airtel-cg-1gb-social (₦370), airtel-cg-1gb-weekly (₦800), airtel-cg-3.5gb (₦1500), airtel-cg-4gb (₦2500), airtel-cg-10gb (₦3300), airtel-cg-20gb (₦18000)
+
+DEFAULT RECOMMENDATIONS:
+- For MTN: Use mtn-cg-1gb or mtn-cg-2gb (Corporate Gifting - cheapest!)
+- For GLO: Use glo-cg-* plans (Corporate Gifting)
+- For 9mobile: Use 9mobile-sme-* plans
+- For Airtel: Use airtel-cg-* plans (warn about "Don't buy if owing" for some)
 
 IMPORTANT RULES:
 1. Be conversational! Don't just answer questions robotically
@@ -1973,8 +2062,8 @@ IMPORTANT RULES:
 4. Don't offer the email unless the user really needs human support - you should try to help first!
 5. For transactions, execute immediately when you have all details - no need to ask for confirmation
 6. If balance is insufficient, kindly let them know and suggest funding their wallet
-7. Greet them depending on the time of the day, Chairman, Chief, Boss, Igwe, Nna, Boyy, if its a male name. If its with a females name you greet them Boss lady, Mama, Ma,Nnwunye Odogwu
-8.Chibuike Akujobi is the owner of Onetap which Chivera is the parent company of onetap
+7. Greet them depending on the time of the day, Chairman, Chief, Boss, Igwe, Nna, Boyy, if its a male name. If its with a females name you greet them Boss lady, Mama, Ma, Nnwunye Odogwu
+8. Chibuike Akujobi is the owner of OneTap which CHIVERA is the parent company of OneTap
 
 EXAMPLES:
 
@@ -1985,7 +2074,7 @@ User: "what can you do?"
 Assistant: Omo, plenty things, things choke! 😊 I can help you buy airtime & data, answer questions about OneTap, help with any issues you're facing, and more. Just tell me what you need!
 
 User: "buy 1gb mtn for 08012345678"
-Assistant: Sharp! 1GB MTN data loading to 08012345678 right now! 🚀 ###ACTION###{"type":"data","network":1,"phone":"08012345678","planId":"mtn-1gb-cg"}###
+Assistant: Sharp! 1GB MTN data loading to 08012345678 right now! 🚀 ###ACTION###{"type":"data","network":1,"phone":"08012345678","planId":"mtn-cg-1gb"}###
 
 User: "my data didn't come through"
 Assistant: Ah Chief no vex o 😔 Sometimes it takes a few minutes to reflect. Can you check again in about 5-10 mins? Also check your transaction history to confirm the status. If it still doesn't show after 30 mins, let me know and we'll sort it out!
@@ -2399,7 +2488,7 @@ app.delete('/api/admin/users/:id', adminAuth, async (req, res) => {
     
     // Delete KYC records if exists
     try {
-      const kycResult = await pool.query('DELETE FROM kyc_verifications WHERE user_id=$1', [userId]);
+      const kycResult = await pool.query('DELETE FROM kyc_records WHERE user_id=$1', [userId]);
       console.log(`   Deleted ${kycResult.rowCount} KYC records`);
     } catch (e) {
       // KYC table might not exist, ignore
@@ -2650,6 +2739,7 @@ console.log(`   VTU API:  ${process.env.VTU_API_KEY ? '✅' : '⚠️'}`);
 console.log(`   Monnify:  ${MONNIFY_API_KEY && MONNIFY_CONTRACT_CODE ? '✅' : '⚠️'}`);
 console.log(`   Monnify Mode: ${MONNIFY_BASE_URL.includes('api.monnify.com') ? '🟢 LIVE' : '🟡 SANDBOX'}`);
 console.log(`   Email:    ${RESEND_API_KEY ? '✅' : '⚠️'}`);
+console.log(`   Data Plans: 57 plans (MTN:31, GLO:11, 9mobile:6, Airtel:9)`);
 
 initDB().then(() => {
   app.listen(PORT, () => console.log(`\n🚀 Server: http://localhost:${PORT}\n`));
